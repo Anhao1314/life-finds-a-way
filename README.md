@@ -20,14 +20,14 @@
 
 > **我负责提出值得解决的问题，AI 负责探索可能的道路，真实世界负责给出反馈。**
 
-**Life Finds a Way** 试图改变我与 编程智能体 的协作方式：不再提前锁死每一步实现，而是明确使命、已有事实、资源与边界，让 AI 探索可行路径，再用真实验证决定是否接受。
+**Life Finds a Way** 试图改变我与编程智能体的协作方式：不再提前锁死每一步实现，而是明确使命、已有事实、资源与边界，让 AI 探索可行路径，再用真实验证决定是否接受。
 
 这是一份**持续修订的工作假设**，不是新的编程智能体框架，也不是已被证明能够普遍提高开发效率的方法。
 
 <a id="start"></a>
 ## 01 · 从这里开始
 
-**不必先读完整宪章。** 先选一个真实问题，把终点和边界告诉 编程智能体。
+**不必先读完整宪章。** 先选一个真实问题，把终点和边界告诉编程智能体。
 
 ```text
 使命：我真正想解决什么问题？成功时能观察到什么？
@@ -43,14 +43,14 @@
 
 **想直接调用技能？** v0.2 候选版见 [PR #3](https://github.com/Anhao1314/life-finds-a-way/pull/3) 和 [安装说明（开发分支）](https://github.com/Anhao1314/life-finds-a-way/blob/feat/v0.2-agent-skill/docs/skill-guide.md)。安装后，Codex 使用 `$life-finds-a-way`，Claude Code 使用 `/life-finds-a-way`。
 
-> **注意：** v0.2 技能尚未合并至 `main`。部分第三方 Claude 桌面端需要在应用的“设置 → 技能”（Settings → 技能s）中单独导入；在终端安装成功，不代表桌面端一定能发现。
+> **注意：** v0.2 技能尚未合并至 `main`。部分第三方 Claude 桌面端需要在应用的“设置 → 技能”（Settings → Skills）中单独导入；在终端安装成功，不代表桌面端一定能发现。
 
 <a id="journey"></a>
 ## 02 · 我的转变
 
 我不是一开始就相信「开放路径」。这套思想来自我在 AI 辅助编程中反复走过的弯路。
 
-**01 / 以为 提示词 越详细越可靠。** 我替 AI 选框架、画架构、拆任务，却常常把未经验证的技术方案当作问题本身。
+**01 / 以为提示词越详细越可靠。** 我替 AI 选框架、画架构、拆任务，却常常把未经验证的技术方案当作问题本身。
 
 **02 / 工程不断推进，目标却越来越远。** 我花时间处理依赖、接口和工作流，逐渐分不清自己是在解决用户问题，还是在维护原先选定的路线。
 
@@ -101,7 +101,7 @@
 
 这个理念不是从成功案例里挑出来的漂亮口号。几次不够理想的真实结果促使我改变了判断方式：
 
-- **[Deep Native](https://github.com/Anhao1314/deep-native/blob/main/docs/v0.1-pilot-findings.md)**：10 组配对中，Raw DeepSeek 为 **8/10**，加入 技能 后为 **7/10**。小样本不能否定所有 技能，却足以反对「流程越多效果越好」的直觉。
+- **[Deep Native](https://github.com/Anhao1314/deep-native/blob/main/docs/v0.1-pilot-findings.md)**：10 组配对中，Raw DeepSeek 为 **8/10**，加入技能后为 **7/10**。小样本不能否定所有技能，却足以反对「流程越多效果越好」的直觉。
 - **[G1 具身研究](https://github.com/Anhao1314/g1-jev-swarm-lab/blob/main/docs/lab-notebook/negative-results.md)**：保留严格失败与受限结论，不能为了得到 PASS 改写历史评分。
 - **[FlowCredit](https://github.com/Anhao1314/flowcredit-research)**：报告生成、工程跑通和模型调用次数，都不能替代真实用户价值。
 
