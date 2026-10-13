@@ -12,7 +12,7 @@
 
 **我曾经试图告诉 AI 每一步该怎么走。后来我发现，我可能一直在替它提前选择答案。**
 
-[**我的转变 ↓**](#the-journey) · [**研发原则 ↗**](./CHARTER.md) · [**任务模板 ↓**](#quickstart)
+[**安装 Skill ↗**](./docs/skill-guide.md) · [**我的转变 ↓**](#the-journey) · [**研发原则 ↗**](./CHARTER.md) · [**任务模板 ↓**](#quickstart)
 
 </div>
 
