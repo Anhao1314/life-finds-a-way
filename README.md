@@ -6,9 +6,11 @@
   <img alt="Life Finds a Way：从同一个使命出发，探索多条道路，让真实证据决定保留什么。" src="./assets/hero-light.svg" width="1200">
 </picture>
 
-**一份从 AI Coding 失败中长出来的研发哲学**
+**生命会寻求自己的出路**
 
-*Define the destination. Let intelligence find the way. Let evidence decide what survives.*
+一份从 AI 辅助编程的失败经历中形成的研发理念
+
+*明确目标，让智能寻找道路，让证据决定什么值得保留。*
 
 [开始使用](#start) · [我的故事](#journey) · [研发方法](#method) · [证据与阅读](#evidence)
 
@@ -18,14 +20,14 @@
 
 > **我负责提出值得解决的问题，AI 负责探索可能的道路，真实世界负责给出反馈。**
 
-**Life Finds a Way** 试图改变我与 Coding Agent 的协作方式：不再提前锁死每一步实现，而是明确使命、已有事实、资源与边界，让 AI 探索可行路径，再用真实验证决定是否接受。
+**Life Finds a Way** 试图改变我与 编程智能体 的协作方式：不再提前锁死每一步实现，而是明确使命、已有事实、资源与边界，让 AI 探索可行路径，再用真实验证决定是否接受。
 
-这是一份**持续修订的工作假设**，不是新的 Coding Agent 框架，也不是已被证明能够普遍提高开发效率的方法。
+这是一份**持续修订的工作假设**，不是新的编程智能体框架，也不是已被证明能够普遍提高开发效率的方法。
 
 <a id="start"></a>
-## 01 · Start Here / 从这里开始
+## 01 · 从这里开始
 
-**不必先读完整宪章。** 先选一个真实问题，把终点和边界告诉 Coding Agent。
+**不必先读完整宪章。** 先选一个真实问题，把终点和边界告诉 编程智能体。
 
 ```text
 使命：我真正想解决什么问题？成功时能观察到什么？
@@ -39,16 +41,16 @@
 仅在现有授权范围内推进，报告实际结果、失败、未知与成本。
 ```
 
-**希望直接调用 Skill？** v0.2 候选版见 [PR #3](https://github.com/Anhao1314/life-finds-a-way/pull/3) 和 [安装说明（开发分支）](https://github.com/Anhao1314/life-finds-a-way/blob/feat/v0.2-agent-skill/docs/skill-guide.md)。安装后，Codex 使用 `$life-finds-a-way`，Claude Code 使用 `/life-finds-a-way`。
+**想直接调用技能？** v0.2 候选版见 [PR #3](https://github.com/Anhao1314/life-finds-a-way/pull/3) 和 [安装说明（开发分支）](https://github.com/Anhao1314/life-finds-a-way/blob/feat/v0.2-agent-skill/docs/skill-guide.md)。安装后，Codex 使用 `$life-finds-a-way`，Claude Code 使用 `/life-finds-a-way`。
 
-> **注意：** v0.2 Skill 尚未合并至 `main`；部分第三方 Claude 桌面端需要通过自身的 **Settings → Skills** 导入，CLI 目录安装不一定会自动出现在桌面端。
+> **注意：** v0.2 技能尚未合并至 `main`。部分第三方 Claude 桌面端需要在应用的“设置 → 技能”（Settings → 技能s）中单独导入；在终端安装成功，不代表桌面端一定能发现。
 
 <a id="journey"></a>
-## 02 · The Journey / 我的转变
+## 02 · 我的转变
 
-我不是一开始就相信「开放路径」。这套思想来自我在 AI Coding 中反复走过的弯路。
+我不是一开始就相信「开放路径」。这套思想来自我在 AI 辅助编程中反复走过的弯路。
 
-**01 / 以为 Prompt 越详细越可靠。** 我替 AI 选框架、画架构、拆任务，却常常把未经验证的技术方案当作问题本身。
+**01 / 以为 提示词 越详细越可靠。** 我替 AI 选框架、画架构、拆任务，却常常把未经验证的技术方案当作问题本身。
 
 **02 / 工程不断推进，目标却越来越远。** 我花时间处理依赖、接口和工作流，逐渐分不清自己是在解决用户问题，还是在维护原先选定的路线。
 
@@ -56,50 +58,50 @@
 
 **04 / 我开始反过来问。** 为什么总是先指定「怎么做」，却很少允许 AI 判断「是否值得这样做」？
 
-**05 / 2026.10.13：Life Finds a Way。** 我决定先定义值得抵达的地方和不能突破的边界，让智能探索道路，让实验决定哪些改变值得留下。
+**05 / 2026.10.13：生命会寻求自己的出路。** 我决定先定义值得抵达的地方和不能突破的边界，让智能探索道路，让实验决定哪些改变值得留下。
 
 > **以前，我常常先选道路，再要求 AI 证明它走得通。现在，我想让证据来选择道路。**
 
 [**阅读完整故事：五个阶段、具体失败与我的反思 →**](./docs/origin-story.md)
 
 <a id="method"></a>
-## 03 · The Method / 让证据选择路径
+## 03 · 让证据选择路径
 
 <div align="center">
 
-**MISSION → VARIATION → FALSIFICATION → SELECTION → RETENTION**
+**明确使命 → 探索不同道路 → 尝试证伪 → 证据判断 → 保留有效改变**
 
-*明确目标 → 探索路径 → 尝试证伪 → 判断得失 → 保留有效改变*
+*不预先锁死技术路线，也不放弃验证与最终责任。*
 
 </div>
 
 | 阶段 | 做什么 |
 | :--- | :--- |
-| **Frame · 定义问题** | 核对真实基线、资源与验收条件，不把猜测当事实。 |
-| **Explore · 开放路径** | 允许 AI 质疑预设方案，优先复用现有资产和更简单的办法。 |
-| **Verify · 最小验证** | 在必要时设计能暴露错误假设的实验，保留失败和未知。 |
-| **Decide · 证据选择** | 根据结果与成本，接受、回退、换路或停止。 |
+| **定义问题** | 核对真实基线、资源与验收条件，不把猜测当事实。 |
+| **开放路径** | 允许 AI 质疑预设方案，优先复用现有资产和更简单的办法。 |
+| **最小验证** | 在必要时设计能暴露错误假设的实验，保留失败和未知。 |
+| **证据选择** | 根据结果与成本，接受、回退、换路或停止。 |
 
 **它不是强制四步流程。** 一行代码能解决的问题，就不需要多 Agent、复杂计划和长篇实验报告。
 
-### Freedom has boundaries / 自主不等于无条件授权
+### 自主探索的边界
 
 - **方法可以改变，权限不能自行扩大。** 未经批准，不调用付费资源、不部署、不改变密钥与权限、不执行破坏性操作。
 - **证据可以推翻方案，不能为了方案改写证据。** 保留 `FAIL`、`BLOCKED`、`INCONCLUSIVE`、`NOT_PROVEN` 和历史评分。
 - **Agent 可以探索，人仍对使命与接受结果负责。** 代码运行成功不自动等于实际价值成立。
 
-### Model scope / 模型适用范围
+### 模型适用范围
 
 现阶段优先面向擅长高阶推理与自主规划的模型，例如 GPT-6 Astra、Claude 的高级推理配置等。轻量模型应缩小任务范围、明确必要约束并增加人工检查。
 
 **这只是当前使用边界，不是已经被对照实验确认的模型能力分界线。** 使用高级模型也不保证结果更好。
 
 <a id="evidence"></a>
-## 04 · Evidence & Reading / 证据与阅读
+## 04 · 证据与延伸阅读
 
 这个理念不是从成功案例里挑出来的漂亮口号。几次不够理想的真实结果促使我改变了判断方式：
 
-- **[Deep Native](https://github.com/Anhao1314/deep-native/blob/main/docs/v0.1-pilot-findings.md)**：10 组配对中，Raw DeepSeek 为 **8/10**，加入 Skill 后为 **7/10**。小样本不能否定所有 Skill，却足以反对「流程越多效果越好」的直觉。
+- **[Deep Native](https://github.com/Anhao1314/deep-native/blob/main/docs/v0.1-pilot-findings.md)**：10 组配对中，Raw DeepSeek 为 **8/10**，加入 技能 后为 **7/10**。小样本不能否定所有 技能，却足以反对「流程越多效果越好」的直觉。
 - **[G1 具身研究](https://github.com/Anhao1314/g1-jev-swarm-lab/blob/main/docs/lab-notebook/negative-results.md)**：保留严格失败与受限结论，不能为了得到 PASS 改写历史评分。
 - **[FlowCredit](https://github.com/Anhao1314/flowcredit-research)**：报告生成、工程跑通和模型调用次数，都不能替代真实用户价值。
 
@@ -109,10 +111,10 @@
 
 <div align="center">
 
-**Life finds a way.**
+**生命会寻求自己的出路。**
 
-*Let evidence decide what survives.*
+*让证据决定什么值得保留。*
 
-<sub>Open paths. Hard boundaries. Honest evidence.</sub>
+<sub>开放路径 · 严守边界 · 忠于证据</sub>
 
 </div>
