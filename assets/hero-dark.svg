@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400" viewBox="0 0 1200 400" role="img" aria-labelledby="title desc">
+<title id="title">Life Finds a Way</title>
+<desc id="desc">A single mission branches into competing paths. Evidence selects one path to retain; other routes stop without being erased.</desc>
+<defs>
+  <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse"><path d="M 36 0 L 0 0 0 36" fill="none" stroke="#406050" stroke-width="0.65" opacity="0.13"/></pattern>
+  <linearGradient id="route" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#4E8E74"/><stop offset="0.65" stop-color="#60D7B3"/><stop offset="1" stop-color="#B4F471"/></linearGradient>
+  <radialGradient id="glow"><stop stop-color="#B4F471" stop-opacity="0.26"/><stop offset="1" stop-color="#B4F471" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="1200" height="400" rx="14" fill="#101B18"/>
+<rect width="1200" height="400" rx="14" fill="url(#grid)"/>
+<path d="M54 60H1146M54 353H1146" stroke="#466457" stroke-opacity="0.55" stroke-width="1"/>
+<text x="54" y="40" fill="#90AAA0" font-family="Arial, sans-serif" font-size="12" font-weight="600" letter-spacing="2.6">AN OPEN RESEARCH CHARTER</text>
+<text x="1146" y="40" text-anchor="end" fill="#90AAA0" font-family="Arial, sans-serif" font-size="12" letter-spacing="1.7">001 / 2026</text>
+<text x="54" y="158" fill="#F2F8EE" font-family="Georgia, 'Times New Roman', serif" font-size="76" font-weight="700" letter-spacing="-2.5">Life Finds</text>
+<text x="54" y="241" fill="#B4F471" font-family="Georgia, 'Times New Roman', serif" font-size="88" font-weight="700" font-style="italic" letter-spacing="-3.2">a Way.</text>
+<text x="60" y="294" fill="#F2F8EE" font-family="'Noto Sans CJK SC', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif" font-size="22" font-weight="500" letter-spacing="1">生命会寻求自己的出路</text>
+<text x="60" y="330" fill="#90AAA0" font-family="Arial, sans-serif" font-size="12.4" letter-spacing="1.5">GOAL-DRIVEN AUTONOMY  /  EVIDENCE-FIRST</text>
+<path d="M613 90V319" stroke="#466457" opacity="0.3" stroke-width="1"/>
+<circle cx="694" cy="213" r="55" fill="url(#glow)"/>
+<!-- Candidate routes, preserved as visible evidence even after rejection. -->
+<g fill="none" stroke="#77918B" stroke-linecap="round">
+<path d="M694 213 C764 211 784 100 855 106 S934 155 969 175" stroke-width="2" opacity="0.45"/>
+<path d="M694 213 C768 207 801 165 860 170 S939 191 966 194" stroke-width="2" opacity="0.65"/>
+<path d="M694 213 C760 215 796 304 855 315 S922 313 941 288" stroke-width="2" opacity="0.42"/>
+<path d="M694 213 C743 215 786 276 831 288" stroke-width="1.5" stroke-dasharray="4 6" opacity="0.4"/>
+<path d="M968 174 C1002 171 1024 132 1067 136" stroke-width="1.5" stroke-dasharray="3 7" opacity="0.36"/>
+<path d="M966 194 C1013 187 1037 265 1092 273" stroke-width="1.5" stroke-dasharray="3 7" opacity="0.4"/>
+</g>
+<!-- The retained route: one path is selected by evidence, not preordained. -->
+<path d="M694 213 C763 209 798 246 860 258 S927 212 971 211 S1053 210 1122 210" fill="none" stroke="url(#route)" stroke-width="4.5" stroke-linecap="round"/>
+<line x1="961" y1="116" x2="961" y2="299" stroke="#90AAA0" stroke-width="1" opacity="0.6" stroke-dasharray="3 6"/>
+<circle cx="694" cy="213" r="6" fill="#B4F471"/>
+<circle cx="860" cy="258" r="5.5" fill="#60D7B3"/>
+<circle cx="961" cy="211" r="11" fill="#101B18" stroke="#60D7B3" stroke-width="2"/>
+<circle cx="961" cy="211" r="3.5" fill="#60D7B3"/>
+<circle cx="1122" cy="210" r="12" fill="none" stroke="#B4F471" stroke-width="1.8"/>
+<circle cx="1122" cy="210" r="5" fill="#B4F471"/>
+<g fill="#77918B"><circle cx="855" cy="106" r="4"/><circle cx="860" cy="170" r="4"/><circle cx="855" cy="315" r="4"/><circle cx="831" cy="288" r="3"/></g>
+<g fill="#90AAA0" font-family="Arial, sans-serif" font-weight="600" font-size="11" letter-spacing="1.6">
+<text x="670" y="341">VARIATION</text>
+<text x="925" y="341">SELECTION</text>
+<text x="1125" y="341" text-anchor="end">RETENTION</text>
+</g>
+<text x="54" y="378" fill="#90AAA0" font-family="Arial, sans-serif" font-size="11.5" letter-spacing="1.4">DEFINE THE GOAL. FREE THE PATH.</text>
+<text x="1146" y="378" text-anchor="end" fill="#60D7B3" font-family="Arial, sans-serif" font-size="11.5" letter-spacing="1.4">LET EVIDENCE DECIDE.</text>
+</svg>
