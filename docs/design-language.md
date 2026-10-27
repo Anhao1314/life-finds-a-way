@@ -45,10 +45,11 @@
 
 | 产物 | 尺寸 | 用途 |
 | --- | --- | --- |
-| `assets/hero-banner-dark.png` / `-light` | 1200×560 | README 主视觉：中文标题与英文锁排都烧进图里 |
-| `assets/evidence-dark.png` / `-light` | 1200×416 | README 证据板：三列数字与状态 |
-| `assets/divider-dark.png` / `-light` | 1200×64 | README 章节分隔带 |
-| `assets/loop-dark.png` / `loop-light.png` | 1280×600 | README 的闭环示意图 |
+| `assets/hero-banner-dark.png` / `-light` | 888×414 | README 主视觉：中文标题与英文锁排都烧进图里 |
+| `assets/evidence-dark.png` / `-light` | 888×309 | README 证据板：三列数字与状态 |
+| `assets/divider-dark.png` / `-light` | 888×48 | README 章节分隔带 |
+| `assets/loop-dark.png` / `loop-light.png` | 888×417 | README 的闭环示意图 |
+| `assets/media/journey.gif` | 640×360 · 92 帧 · 12 fps | README 的动效演示，约 0.45 MB |
 | `assets/site/hero.png` | 1280×720 | 站点首屏背景（不含文字） |
 | `assets/site/fork.png` | 1280×720 | 提问的方式：一条路分岔，左暗右亮 |
 | `assets/site/boundary.png` | 1280×720 | 自主的边界：顶部许可区、一条边界虚线、越线尝试到线即止 |
@@ -57,7 +58,6 @@
 | `assets/site/nebula.png` | 1280×720 | 结尾场景的抖动星云 |
 | `assets/site/evidence-wall.png` | 1280×720 | 证据墙：状态记号组成的纹理（站点内压到 0.22 不透明度） |
 | `assets/site/ring.png` | 600×300 | 闭环的虚线轨道 |
-| `assets/media/journey.gif` | 720×405 · 102 帧 · 12 fps | README 的动效演示，约 0.7 MB |
 
 三个母题：
 
@@ -67,6 +67,13 @@
 
 绘制顺序有讲究：**先光带与雾，再给每条路"凿"出暗槽（`carve()` 乘法压暗），最后落线。**
 不振槽的话，虚线路会被亮区吞掉——这是从实际渲染里看出来的，不是想出来的。
+
+**输出宽度必须等于显示宽度（1:1 出图）。**
+1-bit 网点经非整数缩放必然糊掉：第一版 README 图按 1200px 出图，被 GitHub 的栏目（约 888px）压到
+0.74 倍，3px 网点变成 2.2px 的糊斑；动图更被缩到 0.5625 倍。修正后：
+README 位图按 296 逻辑像素 ×3 = 888px 出图（与栏目宽一致），`<img width="888">`；
+动图从 1280×720 的帧按整数倍最近邻缩到 640×360（每点恰好 2px），绝不用 LANCZOS。
+逻辑画布改窄后构图要重排：暗池、椭圆半径、标签位置都是跟着画布尺寸反推的，不是挪一挪就行。
 
 还有一条更硬的规则：**美术必须避让文字带。**
 `content_band()` 把场景中段（纵向 20%~82%，边界用 smoothstep 过渡）的场值按比例压暗，
@@ -120,9 +127,10 @@ GitHub 的 markdown 装不下字体、CSS 与 JS——**README 里能承载动�
 - 拍摄：把动画进度变成可设定的参数（`animation: none` + 直接写 `mask-position` / `offset-distance` /
   `opacity`），逐帧设定状态再截图，因此帧与帧之间的时间完全可控，不受截图延迟影响。
   帧序列不入库（`frames/` 在 `.build/` 下）。
-- 合成：`tools/make_gif.py` 把每帧量化到同一组固定色（黑、白、四档灰），
+- 合成：`tools/make_gif.py` 把每帧按**整数倍最近邻**缩放（1280→640，每点恰好 2px），
+  再量化到同一组固定色（黑、白、四档灰）。不用 LANCZOS——它会把网点糊成雾；
   不用自适应调色板——否则帧间调色板漂移会闪，而且 LZW 压缩更差。
-- 结果：8.5 秒 / 720×405 / 12 fps 的 GIF 只有约 0.7 MB，因为画面本身就是 1-bit 的。
+- 结果：8.5 秒 / 640×360 / 12 fps 的 GIF 只有约 0.45 MB，因为画面本身就是 1-bit 的。
 
 ## 七、内容纪律
 

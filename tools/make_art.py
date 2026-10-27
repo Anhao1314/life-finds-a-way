@@ -336,10 +336,10 @@ def ring(W, H, invert=False, dashes=30, duty=0.42, radius=0.42, thickness=1):
 
 
 
-def loop_diagram(W=320, H=150, invert=False):
+def loop_diagram(W=296, H=139, invert=False):
     """给 README 用的闭环示意图：虚线环 + 三个节点 + 烧进图里的中文标签。"""
     f = field(W, H)
-    cx, cy, rx, ry = W / 2, 66, 96, 30
+    cx, cy, rx, ry = W / 2, 61, 86, 28
     dashes, duty = 34, 0.42
     spread = 360.0 / dashes
     for i in range(dashes):
@@ -367,14 +367,11 @@ def loop_diagram(W=320, H=150, invert=False):
         stamp_text(img, text, size, (int(cx - width_of(text, size) / 2), y), ink=ink, shadow=None)
 
     stamp_text(img, "变异", 24, (6, int(cy) - 14), ink=ink, shadow=None)
-    centered("保留", 24, 6)
-    centered("选择", 24, H - 32)
-    stamp_text(img, "01", 12, (int(cx - rx) + 12, int(cy) - 16), ink=ink, shadow=None)
-    stamp_text(img, "02", 12, (int(cx) + 12, int(cy + ry) - 6), ink=ink, shadow=None)
-    stamp_text(img, "03", 12, (int(cx) + 12, int(cy - ry) + 4), ink=ink, shadow=None)
-    centered("Variation → Selection", 12, int(cy) - 16)
-    centered("→ Retention", 12, int(cy) + 4)
-    return upscale(img)
+    centered("保留", 24, 4)
+    centered("选择", 24, H - 30)
+    centered("Variation → Selection", 12, int(cy) - 10)
+    centered("→ Retention", 12, int(cy) + 12)
+    return upscale(img, 3)
 
 
 
@@ -493,7 +490,7 @@ def step_icon(kind, invert=False, S=30, k=4):
     return upscale(quantize(f, invert=invert), k)
 
 
-def hero_banner(W=300, H=140, invert=False, seed=13):
+def hero_banner(W=296, H=138, invert=False, seed=13):
     """README 主视觉：中文标题烧进图里，右侧是被证据选中的那条路。"""
     f = field(W, H)
     rad = value_noise(W, H, 5, seed)
@@ -538,16 +535,16 @@ def hero_banner(W=300, H=140, invert=False, seed=13):
         put(f, rnd.randrange(W), rnd.randrange(int(H * 0.42)), 1.0, absolute=True)
 
     lx, ly = int(0.06 * W), int(0.09 * H)
-    darken_ellipse(f, lx + 0.42 * W, ly + 18, 0.46 * W, 0.21 * H, 0.92)
+    darken_ellipse(f, lx + 0.40 * W, ly + 34, 0.44 * W, 0.30 * H, 0.96, feather=1.3)
     img = quantize(f, invert=invert)
     ink = 0 if invert else 1
     stamp_text(img, "LIFE FINDS A WAY", 12, (lx, ly), tracking=1, ink=ink)
     stamp_text(img, "生命会寻求自己的出路", 24, (lx, ly + 20), ink=ink)
-    stamp_text(img, "让证据决定什么值得保留。", 12, (lx, ly + 52), ink=ink, shadow=None)
-    return upscale(img)
+    stamp_text(img, "让证据决定什么值得保留。", 12, (lx, ly + 52), ink=ink)
+    return upscale(img, 3)
 
 
-def evidence_board(W=300, H=104, invert=False, seed=71):
+def evidence_board(W=296, H=103, invert=False, seed=71):
     """README 版证据板：三列数字与状态，全部烧进像素字。列宽按 1200px 显示宽度反推。"""
     f = field(W, H)
     n = value_noise(W, H, 5, seed)
@@ -555,10 +552,10 @@ def evidence_board(W=300, H=104, invert=False, seed=71):
         for x in range(W):
             f[y][x] += 0.05 + n[y][x] * 0.07
     beam(f, (0.0, -0.2 * H), (1.0 * H, 1.3 * H), 0.045 * W, 0.07)
-    cols = [8, 106, 204]
-    for cx in (106, 204):
+    cols = [6, 102, 198]
+    for cx in (102, 198):
         for y in range(10, H - 10, 4):
-            put(f, cx - 10, y, 1.0, absolute=True)
+            put(f, cx - 12, y, 1.0, absolute=True)
     img = quantize(f, invert=invert)
     ink = 0 if invert else 1
     probe = ImageDraw.Draw(Image.new("L", (1, 1)))
@@ -576,28 +573,28 @@ def evidence_board(W=300, H=104, invert=False, seed=71):
         stamp_text(img, big, 24, (cx, 20), ink=ink, shadow=None)
         stamp_text(img, sub, 12, (cx, 50), ink=ink, shadow=None)
         stamp_text(img, label, 12, (cx, 72), ink=ink, shadow=None)
-    img = upscale(img)
+    img = upscale(img, 3)
     d = ImageDraw.Draw(img)
     for cx in cols:
-        d.line([(cx * 4, 44 * 4), ((cx + 88) * 4, 44 * 4)], fill=ink, width=4)
+        d.line([(cx * 3, 44 * 3), ((cx + 90) * 3, 44 * 3)], fill=ink, width=3)
     return img
 
 
-def divider(W=300, invert=False):
+def divider(W=296, invert=False):
     """章节分隔：一条虚线，中间一颗小芽。"""
     H = 16
     f = field(W, H)
     for x in range(0, W, 7):
-        if 138 <= x <= 160:
+        if 134 <= x <= 158:
             continue
         for k in range(4):
             put(f, x + k, 8, 0.6, absolute=True)
     for yy in range(3, 12):
-        put(f, 150, yy, 1.0, absolute=True)
-    for xx in range(145, 156):
+        put(f, W // 2, yy, 1.0, absolute=True)
+    for xx in range(W // 2 - 5, W // 2 + 6):
         put(f, xx, 6, 1.0, absolute=True)
         put(f, xx, 10, 1.0, absolute=True)
-    return upscale(quantize(f, invert=invert))
+    return upscale(quantize(f, invert=invert), 3)
 
 
 

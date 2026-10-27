@@ -29,14 +29,15 @@ def palette_image() -> Image.Image:
     return p
 
 
-def main(width: int = 720, fps: int = 12, every: int = 1) -> None:
+def main(width: int = 640, fps: int = 12, every: int = 1) -> None:
     pal = palette_image()
     files = sorted(SRC.glob("f*.png"))[::every]
     frames = []
     for f in files:
         im = Image.open(f).convert("RGB")
         h = round(im.height * width / im.width)
-        im = im.resize((width, h), Image.LANCZOS)
+        # 必须是整数倍的最近邻缩放：LANCZOS 会把 1-bit 网点糊成雾
+        im = im.resize((width, h), Image.NEAREST)
         frames.append(im.quantize(palette=pal, dither=Image.NONE))
     OUT.parent.mkdir(parents=True, exist_ok=True)
     frames[0].save(

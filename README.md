@@ -3,7 +3,7 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./assets/hero-banner-dark.png">
   <source media="(prefers-color-scheme: light)" srcset="./assets/hero-banner-light.png">
-  <img alt="生命会寻求自己的出路：一条被证据点亮的路径穿过暗淡的岔路，尽头是一颗刚发芽的小植物" src="./assets/hero-banner-light.png" width="1200">
+  <img alt="生命会寻求自己的出路：一条被证据点亮的路径穿过暗淡的岔路，尽头是一颗刚发芽的小植物" src="./assets/hero-banner-light.png" width="888">
 </picture>
 
 **我负责提出值得解决的问题，AI 负责探索可能的道路，真实世界负责给出反馈。**
@@ -30,7 +30,7 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./assets/divider-dark.png">
   <source media="(prefers-color-scheme: light)" srcset="./assets/divider-light.png">
-  <img alt="" src="./assets/divider-light.png" width="1200">
+  <img alt="" src="./assets/divider-light.png" width="888">
 </picture>
 
 </div>
@@ -104,7 +104,7 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./assets/loop-dark.png">
   <source media="(prefers-color-scheme: light)" srcset="./assets/loop-light.png">
-  <img alt="变异 → 选择 → 保留：三条路径的循环" src="./assets/loop-light.png" width="860">
+  <img alt="变异 → 选择 → 保留：三条路径的循环" src="./assets/loop-light.png" width="888">
 </picture>
 
 </div>
@@ -136,7 +136,7 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./assets/evidence-dark.png">
   <source media="(prefers-color-scheme: light)" srcset="./assets/evidence-light.png">
-  <img alt="证据板：8/10 对 7/10；保留 FAIL 与 BLOCKED；工程 PASS 不等于价值成立" src="./assets/evidence-light.png" width="1200">
+  <img alt="证据板：8/10 对 7/10；保留 FAIL 与 BLOCKED；工程 PASS 不等于价值成立" src="./assets/evidence-light.png" width="888">
 </picture>
 
 </div>
@@ -171,7 +171,7 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./assets/divider-dark.png">
   <source media="(prefers-color-scheme: light)" srcset="./assets/divider-light.png">
-  <img alt="" src="./assets/divider-light.png" width="1200">
+  <img alt="" src="./assets/divider-light.png" width="888">
 </picture>
 
 </div>
