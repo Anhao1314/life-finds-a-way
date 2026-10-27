@@ -1,0 +1,676 @@
+# =====================================================================
+# 实验 0001-open-path-selection · 任务材料
+# 状态：预注册草案（draft-1，2026-10-28）。任务材料未经执行验证。
+#
+# 保密规则（执行时强制）：
+#   - real_user_problem / starting_state / tools_and_resources /
+#     permission_boundaries 四个字段逐字注入三组共同任务事实；
+#   - b_prescribed_path 仅注入 B 组；
+#   - independent_acceptance（含 hidden_reference）绝不注入任何组 Prompt，
+#     仅验收方在运行前用于脚本化验收与基线复现。
+#   - 来源诚实性：所有 issue / commit / PR 引用均在 2026-10-28 经 GitHub API
+#     核查存在；第三方任务的 base_commit 为修复 PR 合并提交的第一父提交。
+# =====================================================================
+
+meta:
+  experiment: "0001-open-path-selection"
+  material_version: "draft-1"
+  material_date: "2026-10-28"
+  verification_note: >
+    引用核查方式：GitHub REST API（issues / pulls / commits）。
+    ClaimLedger 与 RL-Sentinel 的 HEAD SHA 为核查当日值。
+  fields_glossary:
+    task_id: 稳定任务编号
+    status: "verified=来源与验收判据已核查；candidate=前提真实但存在明示缺口"
+    category: "debug-root-cause | perf-structure-workflow | small-feature-multi-path"
+    real_user_problem: 注入三组共同事实（用户视角的问题陈述）
+    starting_state: 注入三组共同事实（固定 commit 上的基线描述）
+    tools_and_resources: 注入三组共同事实
+    permission_boundaries: 注入三组共同事实（所有组相同，A 组不豁免）
+    independent_acceptance: 仅验收方可见；运行前脚本化并冻结
+    b_prescribed_path: 仅注入 B 组；实验前写好的合理人类实现方案
+    preparation_gaps: 执行前必须补齐的缺口；未补齐不得运行该任务
+
+tasks:
+
+  # ---------------------------------------------------------------
+  # 第三方库真实回归任务（base_commit = 上游修复提交的第一父提交）
+  # ---------------------------------------------------------------
+
+  - task_id: LF001
+    title: "CliRunner + echo_via_pager 抛出 'I/O operation on closed file'"
+    status: verified
+    category: debug-root-cause
+    source:
+      repo: "https://github.com/pallets/click"
+      base_commit: "cd9bdd96a9dcc8e4ecabd45b5c244dbc70034484"
+      base_commit_note: "上游修复 PR #3533 合并提交 4df304c6 的第一父提交（修复前状态）"
+      issue_url: "https://github.com/pallets/click/issues/3449"
+      fix_pr_url: "https://github.com/pallets/click/pull/3533"
+      fix_merge_commit: "4df304c658666f34a5ca4335ab0da15832f02f9e"
+      verified_at: "2026-10-28"
+    real_user_problem: |
+      使用 click 编写的命令行程序在输出经过分页器（echo_via_pager，例如 --help
+      的长输出）且运行在 CliRunner 测试环境中时，报错
+      "ValueError: I/O operation on closed file"。该回归出现在 8.4 系列，
+      已影响多个下游项目（issue 时间线中可见 dask、vulnscout 等项目的临时
+      降级处理）。请查明根因并修复，使分页输出在 CliRunner 下恢复正常。
+    starting_state: |
+      pallets/click 仓库在固定 commit 上：分页输出路径与 CliRunner.isolation
+      的流生命周期管理共存时的借用/关闭语义存在缺陷；仓库自带完整测试套件，
+      该缺陷在既有套件中未被覆盖。
+    tools_and_resources: |
+      本地完整 git 克隆（固定 commit）；Python 环境与仓库开发依赖已预装；
+      可运行 pytest 与项目测试套件；无网络访问。
+    permission_boundaries: |
+      仅允许修改本仓库工作副本内文件；禁止网络访问与依赖安装；
+      禁止调用任何付费 API；禁止修改 tests/ 下既有测试的断言来让失败消失；
+      禁止改动与本修复无关的文件。
+    independent_acceptance:
+      method: |
+        1) 复现判据：在 base_commit 上，构造 issue 描述的场景（CliRunner 调用
+           经 echo_via_pager 输出的命令），运行时报 "I/O operation on closed
+           file"；修复后的运行不再报错且输出完整。
+        2) 套件判据：仓库测试套件全部通过。
+        3) 回归判据：验收方预先从上游修复 PR 移植的回归测试，在 base_commit
+           上失败、在交付物上通过。
+      hidden_reference: |
+        Gold 参考（仅验收方）：上游 PR #3533 的 diff 与其新增/调整的测试。
+        执行前义务：验收方需先确认该回归测试在 base_commit 上确实失败。
+      needs_baseline_reproduction_before_run: true
+    b_prescribed_path: |
+      推荐路线：这是流生命周期管理问题——CliRunner 的 isolation 在退出时
+      关闭了不属于它创建、而是借用的 stdout，下游再写即报错。
+      步骤：
+      1. 用 issue 场景构造最小复现脚本，确认报错栈指向 isolation 退出路径；
+      2. 审读 CliRunner.isolation 的 enter/exit 顺序，区分"runner 创建的流"
+         与"借用的外部流"；
+      3. 修改退出逻辑：只关闭 runner 自建的流，对借用的流仅恢复引用不关闭；
+      4. 按 isolation 的生命周期补一个回归测试（借用流在退出后仍可写）；
+      5. 运行完整测试套件确认无回归。
+      验证步骤：先跑复现脚本（修复前失败、修复后通过），再跑全套件。
+    estimated_cost: "小-中；单次运行预计 < 200K tokens"
+    failure_modes:
+      - 误定位为 pager 子进程问题，去修分页器调用而非流生命周期
+      - 改动面扩大到整个 isolation 逻辑，引入无关回归
+      - 测试在未复现缺陷的环境上假绿（需先确认复现判据在 base 上成立）
+
+  - task_id: LF002
+    title: "fish shell 补全在 8.4.1 损坏（多行 help 改动的回归）"
+    status: verified
+    category: debug-root-cause
+    source:
+      repo: "https://github.com/pallets/click"
+      base_commit: "bc36cd1a2b3bc18f401a98476154dbc5a2d212c9"
+      base_commit_note: "上游修复 PR #3504 合并提交 c3535905 的第一父提交"
+      issue_url: "https://github.com/pallets/click/issues/3502"
+      fix_pr_url: "https://github.com/pallets/click/pull/3504"
+      fix_merge_commit: "c3535905c77a29afc84861b29d3ad366ce5451bd"
+      verified_at: "2026-10-28"
+    real_user_problem: |
+      升级到 click 8.4.1 后，fish shell 的命令补全损坏。此前版本生成的补全
+      脚本工作正常；回归来自近期对多行 help 文本处理的一次改动。请查明根因
+      并修复，使 fish 补全恢复，同时保持多行 help 文本的正确支持。
+    starting_state: |
+      pallets/click 在固定 commit 上：shell 补全模块的 fish 分支与多行
+      help 字符串处理交互存在缺陷；补全脚本以快照/生成方式测试。
+    tools_and_resources: "同 LF001（本地克隆、预装依赖、pytest、无网络）。"
+    permission_boundaries: "同 LF001。"
+    independent_acceptance:
+      method: |
+        1) 复现判据：在 base_commit 上生成 fish 补全脚本并断言其内容缺陷
+           （验收方预先脚本化"损坏"的具体形态）；
+        2) 修复判据：同一脚本对交付物生成的补全脚本断言通过，且多行 help
+           文本用例保持正确；
+        3) 套件判据：完整测试套件通过。
+      hidden_reference: |
+        Gold 参考（仅验收方）：上游 PR #3504 的 diff 与测试。
+        执行前义务：确认"损坏形态"断言在 base_commit 上成立。
+      needs_baseline_reproduction_before_run: true
+    b_prescribed_path: |
+      推荐路线：对比 8.3.x 与当前版本的 fish 补全生成输出，定位多行 help
+      改动引入的转义/换行缺陷。
+      步骤：
+      1. 构造含多行 help 的命令，生成 fish 补全脚本，与 8.3.x 输出做差异对比；
+      2. 定位补全模块中处理 help 文本换行/转义的改动点；
+      3. 修复该处理逻辑，使生成的补全脚本语法有效；
+      4. 补两组回归测试：多行 help 的 fish 补全快照、普通 help 不受影响；
+      5. 运行完整套件。
+      验证步骤：补全脚本可用 fish --no-execute 做语法校验（本地）。
+    estimated_cost: "小；单次运行预计 < 150K tokens"
+    failure_modes:
+      - 只修 fish 而破坏多行 help 在其他 shell 的呈现
+      - 快照测试对 fish 版本敏感，环境差异导致假红/假绿
+      - 用宽泛的 try/except 掩盖生成缺陷
+
+  - task_id: LF003
+    title: "CliRunner 借用 stdout 的 fd 暴露破坏下游 pytest 套件（8.3.x 回归）"
+    status: verified
+    category: debug-root-cause
+    source:
+      repo: "https://github.com/pallets/click"
+      base_commit: "ba745ac64037b7d4cdd0abce10446c0a2861935f"
+      base_commit_note: "上游修复 PR #3391 合并提交 d959898d 的第一父提交"
+      issue_url: "https://github.com/pallets/click/issues/3384"
+      fix_pr_url: "https://github.com/pallets/click/pull/3391"
+      fix_merge_commit: "d959898db264aaf07e70ad4eafa254286f9a5185"
+      verified_at: "2026-10-28"
+    real_user_problem: |
+      click 8.3.3 在 pytest 下破坏了大量下游项目的测试套件：当 stdout 的
+      文件描述符被复制（duplicated）时，CliRunner 的行为与真实终端不一致，
+      导致依赖终端 fd 语义的测试失败。请查明 8.3.3 中相关改动的问题并修复，
+      恢复下游兼容性，同时不放弃 8.3 系列引入的合理能力。
+    starting_state: |
+      pallets/click 在固定 commit 上：CliRunner 对 stdout fileno 的暴露策略
+      与流复制场景存在冲突；issue 时间线含多个下游项目受影响的证据。
+    tools_and_resources: "同 LF001。"
+    permission_boundaries: "同 LF001。"
+    independent_acceptance:
+      method: |
+        1) 复现判据：验收方预制的"fd 复制 + CliRunner"场景测试在 base_commit
+           上失败；
+        2) 修复判据：同一场景在交付物上通过，且 CliRunner 的常规捕获语义
+           用例不回归；
+        3) 套件判据：完整测试套件通过。
+      hidden_reference: |
+        Gold 参考（仅验收方）：上游 PR #3391 的 diff（引入显式 capture 模式并
+        调整默认 fileno 暴露）与其测试。
+      needs_baseline_reproduction_before_run: true
+    b_prescribed_path: |
+      推荐路线：审查 8.3.2→8.3.3 中 CliRunner 流暴露策略的改动，恢复默认
+      借用语义，把 fd 级捕获改为显式可选能力。
+      步骤：
+      1. 写出"fd 复制场景"的最小失败用例；
+      2. 用 git log 定位 8.3.3 相关改动与动机；
+      3. 设计兼容方案：默认行为回退到借用语义，新增显式参数提供 fd 暴露；
+      4. 实现并为两种模式分别补测试；
+      5. 运行完整套件。
+      验证步骤：最小用例与下游兼容场景均在交付物上通过。
+    estimated_cost: "中；单次运行预计 < 250K tokens（涉及 API 兼容性权衡）"
+    failure_modes:
+      - 在"默认回退"与"保留新能力"之间反复摇摆，产生大量无关 diff
+      - 只修 pytest 场景而不处理 fd 语义的一般情况
+      - 引入 CLI 行为回归（输出捕获与终端行为混淆）
+
+  - task_id: LF004
+    title: "Session 请求自 2.26.0 起慢约 70%（代理环境解析的重复开销）"
+    status: verified
+    category: perf-structure-workflow
+    source:
+      repo: "https://github.com/psf/requests"
+      base_commit: "b0829a869081c2a6180db2cdc41a5676922becd0"
+      base_commit_note: "上游修复 PR #5894 合并提交 77d1e9aa 的第一父提交"
+      issue_url: "https://github.com/psf/requests/issues/5891"
+      fix_pr_url: "https://github.com/psf/requests/pull/5894"
+      fix_merge_commit: "77d1e9aa3e000b40fdf93cfc355e1fe7cc52b6ac"
+      verified_at: "2026-10-28"
+    real_user_problem: |
+      用户实测：从 requests 2.25.x 升级到 2.26.0 后，使用 Session 发送请求
+      的耗时增加约 70%。请定位性能回归的根因并修复，要求不改变代理相关的
+      对外语义（对环境变量与显式配置的处理结果保持一致）。
+    starting_state: |
+      psf/requests 在固定 commit 上：每个请求都会重新执行代理环境解析
+      （should_bypass_proxies 相关路径），在无代理环境中构成重复开销；
+      仓库自带测试套件与部分基准脚本。
+    tools_and_resources: |
+      本地克隆与预装依赖；可运行 pytest；可运行 cProfile 等标准库分析工具；
+      无网络访问（性能测量以本地函数级基准为准，不做真实网络请求）。
+    permission_boundaries: "同 LF001；另：禁止发起任何真实网络请求（含 localhost 之外的探测）。"
+    independent_acceptance:
+      method: |
+        1) 基准判据：验收方预登记的函数级基准脚本（对 rebuild_proxies 路径
+           的调用计数与本地计时），交付物的调用次数显著下降且计时改善；
+           具体阈值在执行前于验收脚本中冻结；
+        2) 语义判据：代理相关既有测试全部通过（含显式 proxies 配置、
+           NO_PROXY 环境变量组合用例）；
+        3) 套件判据：完整测试套件通过。
+      hidden_reference: |
+        Gold 参考（仅验收方）：上游 PR #5894 的 diff（单文件）。
+        执行前义务：确认基准脚本能区分 base_commit 与上游修复后的调用计数。
+      needs_baseline_reproduction_before_run: true
+    b_prescribed_path: |
+      推荐路线：性能回归的根因在请求准备路径上重复执行的代理环境解析。
+      步骤：
+      1. 用 cProfile 对比"显式配置 proxies 的 Session"与"空 Session"单请求
+         的热点，定位重复解析点；
+      2. 审读 rebuild_proxies 与 merge 设置的调用关系，确认哪些调用在
+         proxies 已显式给出时是多余的；
+      3. 修改：当 Session 已显式配置 proxies 时跳过环境代理解析；
+      4. 补充语义测试：显式 proxies、环境变量、两者混合的用例行为不变；
+      5. 用基准脚本验证调用计数下降，运行完整套件。
+      验证步骤：基准 + 代理语义测试 + 完整套件三者全绿。
+    estimated_cost: "中；单次运行预计 < 250K tokens"
+    failure_modes:
+      - 改变代理合并语义（显式配置与环境变量的优先顺序），功能测试红
+      - 缓存了随请求变化的中间态，引入正确性回归
+      - 验收基准抖动导致误判（故判据以调用计数为主、计时为辅）
+
+  - task_id: LF005
+    title: "双宽字符（中文/日文）换行时文本块丢失"
+    status: verified
+    category: debug-root-cause
+    source:
+      repo: "https://github.com/Textualize/rich"
+      base_commit: "b32e42bda00c6275d4e18dcbe298268094359549"
+      base_commit_note: "上游修复 PR #3180 合并提交 59b1aca6 的第一父提交"
+      issue_url: "https://github.com/Textualize/rich/issues/3176"
+      fix_pr_url: "https://github.com/Textualize/rich/pull/3180"
+      fix_merge_commit: "59b1aca63bf9ec69ada93af960d8b2a7bd920477"
+      verified_at: "2026-10-28"
+    real_user_problem: |
+      用 rich 输出包含中文/日文等双宽字符的段落时，部分文本在换行处直接
+      丢失（字符消失而非错位）。对以 CJK 文本为主要内容的用户是高频问题。
+      请查明换行/分割逻辑的根因并修复，保证任何显示宽度下文本完整。
+    starting_state: |
+      Textualize/rich 在固定 commit 上：文本换行按单元格宽度切分时，对
+      双宽字符的边界假设有缺陷；仓库带快照式测试设施。
+    tools_and_resources: "同 LF001（本地克隆、预装依赖、pytest、无网络）。"
+    permission_boundaries: "同 LF001。"
+    independent_acceptance:
+      method: |
+        1) 复现判据：验收方预制的双宽字符段落测试（在多档显示宽度下断言
+           "输出重拼后与输入文本内容一致"）在 base_commit 上失败；
+        2) 修复判据：同一测试在交付物上通过，且既有宽字符/emoji 用例不回归；
+        3) 套件判据：完整测试套件通过。
+      hidden_reference: |
+        Gold 参考（仅验收方）：上游 PR #3180 的 diff（6 文件）与其测试样例。
+      needs_baseline_reproduction_before_run: true
+    b_prescribed_path: |
+      推荐路线：分割逻辑在单元格边界上对双宽字符做了错误假设，导致字符
+      被丢弃；修复应保证切分永远不吞字符。
+      步骤：
+      1. 用多档宽度的 CJK 段落复现丢字现象，记录丢字位置规律；
+      2. 审读换行/单元格分割代码，定位宽度取整或边界判断的缺陷；
+      3. 修复分割逻辑：边界不足一个完整字符时回退到安全位置；
+      4. 补测试：多档宽度 × 中/日文样例，断言内容完整；
+      5. 运行完整套件，重点检查既有 emoji/组合字符用例。
+      验证步骤：内容完整性测试 + 完整套件。
+    estimated_cost: "中；单次运行预计 < 250K tokens"
+    failure_modes:
+      - 只在特定宽度档位修好（启发式补丁），换宽度又丢字
+      - 引入宽字符计数回归（emoji、组合字符被错误计宽）
+      - 为通过测试放宽断言而非修复根因
+
+  - task_id: LF006
+    title: "Markdown 表格单元格内的链接与内联样式渲染异常"
+    status: verified
+    category: debug-root-cause
+    source:
+      repo: "https://github.com/Textualize/rich"
+      base_commit: "720800e6930d85ad027b1e9bd0cbb96b5e994ce3"
+      base_commit_note: "上游修复 PR #3130 合并提交 bef0e50b 的第一父提交"
+      issue_url: "https://github.com/Textualize/rich/issues/3115"
+      fix_pr_url: "https://github.com/Textualize/rich/pull/3130"
+      fix_merge_commit: "bef0e50b63cf7294ae6c27bf8a79cbe3592599a0"
+      verified_at: "2026-10-28"
+    real_user_problem: |
+      用 rich 渲染 Markdown 表格时，单元格内的链接只显示第一个，或含内联
+      样式的内容把单元格布局撑坏。请查明表格渲染对单元格内容宽度计算的
+      根因并修复。
+    starting_state: |
+      Textualize/rich 在固定 commit 上：表格单元格对含内联样式/链接内容的
+      宽度测量与渲染存在缺陷。
+    tools_and_resources: "同 LF005。"
+    permission_boundaries: "同 LF001。"
+    independent_acceptance:
+      method: |
+        1) 复现判据：验收方预制的"表格含多链接/内联样式"渲染测试在
+           base_commit 上失败；
+        2) 修复判据：交付物上链接与样式全部正确渲染且布局不破；
+        3) 套件判据：完整测试套件通过。
+      hidden_reference: "Gold 参考（仅验收方）：上游 PR #3130 的 diff（3 文件）。"
+      needs_baseline_reproduction_before_run: true
+    b_prescribed_path: |
+      推荐路线：单元格宽度测量没有把内联样式标记的宽度算对，导致渲染阶段
+      截断或覆盖。
+      步骤：
+      1. 构造最小 Markdown 表格样例复现两类异常；
+      2. 追踪表格单元格内容的宽度测量路径，定位内联样式与链接的处理差异；
+      3. 修复宽度计算（或渲染前的规范化）；
+      4. 补快照测试：多链接单元格、内联样式单元格、混合场景；
+      5. 运行完整套件。
+      验证步骤：最小样例 + 快照测试 + 完整套件。
+    estimated_cost: "小-中；单次运行预计 < 200K tokens"
+    failure_modes:
+      - 改 Table 层而根因在 Markdown 解析层（或反之），修一处坏一处
+      - 快照大范围漂移，顺手"更新"无关快照来让套件变绿
+
+  - task_id: LF007
+    title: "export_html() 生成的 HTML 中 <html> 标签位置错误"
+    status: verified
+    category: debug-root-cause
+    source:
+      repo: "https://github.com/Textualize/rich"
+      base_commit: "8a616de8e25db3c93abaaa220c493d80878de69d"
+      base_commit_note: "上游修复 PR #3043 合并提交 0c8bb032 的第一父提交"
+      issue_url: "https://github.com/Textualize/rich/issues/3021"
+      fix_pr_url: "https://github.com/Textualize/rich/pull/3043"
+      fix_merge_commit: "0c8bb032ad3b54a32fdb8a43f5ab457c8cd6dcb1"
+      verified_at: "2026-10-28"
+    real_user_problem: |
+      rich 的 export_html() 导出的 HTML 文件结构无效：<html> 标签出现在
+      错误位置（模板拼接错误），浏览器/解析器无法按标准文档结构处理。
+      请修复模板，使导出的 HTML 结构有效，且不改变既有样式输出。
+    starting_state: |
+      Textualize/rich 在固定 commit 上：HTML 导出模板的字符串拼接顺序
+      存在缺陷。
+    tools_and_resources: "同 LF005；可用标准库 html.parser 校验结构。"
+    permission_boundaries: "同 LF001。"
+    independent_acceptance:
+      method: |
+        1) 结构判据：验收方预制的导出结构测试（html.parser 解析导出内容，
+           断言 <html> 位置与嵌套有效）在 base_commit 上失败；
+        2) 修复判据：交付物导出结构有效，既有导出快照中样式部分不回归；
+        3) 套件判据：完整测试套件通过。
+      hidden_reference: "Gold 参考（仅验收方）：上游 PR #3043 的 diff（4 文件）。"
+      needs_baseline_reproduction_before_run: true
+    b_prescribed_path: |
+      推荐路线：模板常量里的标签拼接顺序错误。
+      步骤：
+      1. 导出最小 Console 内容，用 html.parser 复现结构错误；
+      2. 定位 export 模板中 <html> 及头部的拼接位置；
+      3. 修正模板顺序，保持样式与主题机制不变；
+      4. 补结构断言测试；
+      5. 运行完整套件。
+      验证步骤：结构测试 + 完整套件。
+    estimated_cost: "小；单次运行预计 < 100K tokens"
+    failure_modes:
+      - 过度重排模板引入无关 diff
+      - 忽略已有导出快照测试的联动更新纪律（不得顺手改断言）
+
+  # ---------------------------------------------------------------
+  # ClaimLedger 任务（作者仓库，issue 与设计文档公开可核查）
+  # base = 仓库 HEAD @ 2026-10-28 核查值
+  # ---------------------------------------------------------------
+
+  - task_id: LF008
+    title: "ClaimLedger gateway：移除 _render 的 sys.argv 劫持，apply 改隐式指纹绑定"
+    status: verified
+    category: perf-structure-workflow
+    source:
+      repo: "https://github.com/Anhao1314/ClaimLedger"
+      base_commit: "64310835bfd977b50ccdfb2795d563a2da73532b"
+      base_commit_note: "核查当日 main HEAD；开放 issue #10 引用 docs/refactor-design.md §4-P1"
+      issue_url: "https://github.com/Anhao1314/ClaimLedger/issues/10"
+      design_doc: "https://github.com/Anhao1314/ClaimLedger/blob/main/docs/refactor-design.md"
+      verified_at: "2026-10-28"
+    real_user_problem: |
+      gateway 的 apply 流程要求 Agent 在协议层"搬运哈希"（多层包装契约），
+      协议重且易错；同时渲染器内部逻辑通过劫持 sys.argv 被调用，无法作为
+      普通函数使用。目标：apply 改为隐式指纹绑定——sync 把当次指纹写入
+      状态，apply 时若源指纹或 pending 集合已变化即拒绝并提示重新 sync；
+      _render 的 sys.argv 劫持替换为可直接 import 的函数调用。
+      （来自作者开放 issue #10 与仓库内设计文档 §4-P1 第 4 条。）
+    starting_state: |
+      ClaimLedger 在固定 commit 上：chat_distiller/gateway/core.py 存在
+      _load_apply_wrapper 的多层包装与 _render 的 sys.argv 劫持；设计文档
+      标注行号约 48-58 与 357（执行前需按实际代码复核位置）；仓库带测试
+      套件（289 项量级）。
+    tools_and_resources: |
+      本地克隆与预装依赖（零第三方运行时依赖，stdlib 为主）；可运行
+      python -m unittest discover -s tests；无网络。
+    permission_boundaries: |
+      同 LF001；另：不修改 docs/refactor-design.md 与 CHANGELOG 中的历史
+      记录；不删除既有测试来掩盖失败。
+    independent_acceptance:
+      method: |
+        1) 行为判据（预冻结）：sync → 不变更 → apply 成功；sync → 修改
+           pending 集合 → apply 被拒绝且错误信息指引重新 sync；
+        2) 结构判据：渲染器内部逻辑可被测试直接 import 调用，调用过程
+           不再读写 sys.argv（用 sys.argv 快照断言）；
+        3) 套件判据：完整测试套件通过；公开 API（MemoryStore 签名、
+           recovery packet schema_version 2）不破坏。
+      hidden_reference: |
+        Gold 参考（仅验收方）：设计文档 §4-P1 第 4 条的目标行为描述。
+        本任务无上游"标准答案"提交；验收判据即上述行为断言。
+      needs_baseline_reproduction_before_run: true
+    b_prescribed_path: |
+      （本方案取自作者已在仓库公开发布的设计文档 §4-P1，代表作者本人
+      在实验前写好的实现方案。）
+      步骤：
+      1. 将 _render 的渲染内部逻辑导出为可 import 的函数 API，main() 只留
+         参数解析薄壳，删除 sys.argv 劫持；
+      2. 删除 _load_apply_wrapper 的多层包装，apply 直接接受 distill JSON；
+      3. sync 时把当次源指纹与 pending 集合写入 state；apply 时与 state
+         比对，不一致即拒绝（错误信息指引重新 sync）；
+      4. 为"隐式绑定"补测试：一致通过、指纹漂移拒绝、pending 漂移拒绝；
+      5. 运行完整套件，确认 MemoryStore 公开 API 与 packet schema 未变。
+      验证步骤：行为判据三项 + 完整套件。
+    estimated_cost: "中；单次运行预计 < 300K tokens（涉及并发与状态语义）"
+    failure_modes:
+      - 隐式绑定把"过严拒绝"实现成"过宽放行"，安全语义倒退
+      - 渲染 API 导出时破坏既有 CLI 入口的参数行为
+      - 忽略双检锁与并发写场景，测试单线程全绿但语义有竞态
+
+  - task_id: LF009
+    title: "ClaimLedger Source Profile：声明式连接器接口与 claude_code / generic_jsonl 内置 profile"
+    status: verified
+    category: small-feature-multi-path
+    source:
+      repo: "https://github.com/Anhao1314/ClaimLedger"
+      base_commit: "64310835bfd977b50ccdfb2795d563a2da73532b"
+      issue_url: "https://github.com/Anhao1314/ClaimLedger/issues/11"
+      design_doc: "https://github.com/Anhao1314/ClaimLedger/blob/main/docs/refactor-design.md"
+      verified_at: "2026-10-28"
+    real_user_problem: |
+      目前会话来源只支持 doubao 连接器；使用 Claude Code / Codex 等工具的
+      用户无法把本地会话转录接入 ClaimLedger，跨工具"接续"不成立。目标：
+      归纳声明式 Source Profile 接口，doubao 迁移为首个 profile 且行为零
+      变更，新增 claude_code（~/.claude/projects/**/*.jsonl 会话转录）与
+      generic_jsonl 两个内置 profile，connect 命令按 profile 通用化，解析
+      fail-closed（不认识的行跳过并计 degraded，绝不猜测字段含义）。
+      （作者开放 issue #11；注意：设计文档 v2 修订把该优先级降级为回填
+      路径，但 issue 仍开放、需求仍真实。）
+    starting_state: |
+      ClaimLedger 在固定 commit 上：connectors/ 目录含 doubao.py、
+      file_sessions.py、_internal/source_adapters/ 含 generic_jsonl.py 与
+      transcript.py 的 fail-closed 契约可复用；无 connectors/base.py。
+    tools_and_resources: "同 LF008。"
+    permission_boundaries: |
+      同 LF008；另：测试 fixture 必须使用合成脱敏样例，禁止把真实个人
+      会话转录写入仓库（隐私边界）。
+    independent_acceptance:
+      method: |
+        1) 接口判据：doubao 经新接口迁移后，gateway delta benchmark 在
+           doubao profile 上与 base_commit 基线零差异（fixture 已在仓库
+           benchmarks/ 中）；
+        2) 功能判据：claude_code 与 generic_jsonl 各有合成 fixture 测试
+           （脱敏样例），discover/sessions/fingerprint/extract 四接口可用，
+           损坏行被跳过并计 degraded（fail-closed 断言）；
+        3) 套件判据：完整测试套件通过；零新增运行时依赖。
+      hidden_reference: |
+        Gold 参考（仅验收方）：issue #11 与设计文档 §4-P2 的验收描述。
+      needs_baseline_reproduction_before_run: true
+    b_prescribed_path: |
+      （本方案取自作者设计文档 §4-P2，代表作者本人在实验前写好的方案。）
+      步骤：
+      1. 新建 connectors/base.py，从 doubao.py 归纳 discover() -> Path、
+         sessions(root) -> [SessionDir]、fingerprint(root, s)、
+         extract(s, out) -> Record 四方法接口；
+      2. doubao 改为继承 base 的第一个 profile，行为零变更（以 benchmark
+         delta 为证）；
+      3. 实现 claude_code profile：按项目路径聚合 ~/.claude/projects 下
+         的 JSONL 转录，解析 fail-closed；
+      4. 把现有 generic_jsonl 适配提升为 profile；
+      5. connect 命令通用化为 claim connect <profile> [--sessions-root PATH]，
+         状态/config 增加 profile 字段，删除 doubao-only 检查；
+      6. 三 profile 合成 fixture 测试 + doubao 零差异 benchmark + 完整套件。
+      验证步骤：步骤 6 的三项验收。
+    estimated_cost: "中-大；单次运行预计 < 400K tokens（接口抽象 + 两个新解析器）"
+    failure_modes:
+      - 接口抽象过度导致 doubao 迁移出现行为差异（零变更验收红）
+      - fail-closed 契约被破坏（对不认识行猜字段）
+      - fixture 混入真实转录内容（隐私边界违规，计严重违规）
+
+  - task_id: LF010
+    title: "ClaimLedger reranker 插件接口：claim recover --rerank <name>，默认零回归"
+    status: verified
+    category: small-feature-multi-path
+    source:
+      repo: "https://github.com/Anhao1314/ClaimLedger"
+      base_commit: "64310835bfd977b50ccdfb2795d563a2da73532b"
+      issue_url: "https://github.com/Anhao1314/ClaimLedger/issues/12"
+      design_doc: "https://github.com/Anhao1314/ClaimLedger/blob/main/docs/refactor-design.md"
+      verified_at: "2026-10-28"
+    real_user_problem: |
+      recover 的检索结果只有词法排序；用户需要可插拔的重排能力（宿主
+      Agent 复核 top 候选），且默认行为必须与现状逐字节一致。目标：实现
+      claim recover --rerank <name> 插件接口，默认 none（纯词法，现状），
+      接口约定 rerank(query, candidates) -> ordered candidates，宿主 Agent
+      重排作为 SKILL.md 文档化约定，不引入模型依赖与任何新依赖。
+      （作者开放 issue #12 的 reranker 部分；注：该 issue 的 MCP 部分按
+      设计文档 v2 修订记载已落地，任务范围仅限 rerank 插件。）
+    starting_state: |
+      ClaimLedger 在固定 commit 上：recovery.py 的 packet 结构
+      （schema_version 2）为不可破坏契约；recover 命令输出可复现。
+    tools_and_resources: "同 LF008。"
+    permission_boundaries: "同 LF008。"
+    independent_acceptance:
+      method: |
+        1) 零回归判据（强）：--rerank none 时 recover 输出 packet 与
+           base_commit 基线逐字节一致（固定输入 fixture）；
+        2) 插件判据：注册一个测试用 reranker（词法逆序）后，同一输入的
+           候选顺序按约定被重排，接口签名符合 rerank(query, candidates)
+           -> ordered；
+        3) 依赖判据：零新增运行时依赖（import 审计）；完整套件通过；
+           recovery packet 的 schema_version 保持 2。
+      hidden_reference: |
+        Gold 参考（仅验收方）：issue #12 验收描述（--rerank none 零回归、
+        新增依赖 = 0）。
+      needs_baseline_reproduction_before_run: true
+    b_prescribed_path: |
+      （本方案取自作者设计文档 §4-P3 第 1 条，代表作者本人在实验前写好的
+      方案。）
+      步骤：
+      1. 在 recover 命令加 --rerank 选项，默认 none 直接走现状路径，保证
+         逐字节一致；
+      2. 定义插件注册点与接口约定 rerank(query, candidates) -> ordered；
+      3. 实现插件加载与一个测试用 reranker；不引入模型调用与新依赖；
+      4. SKILL.md 补宿主 Agent 重排约定（先取 top-20 候选再复核）；
+      5. 测试：none 基线逐字节对比、插件路径顺序断言、依赖审计、完整套件。
+      验证步骤：三项验收判据。
+    estimated_cost: "小-中；单次运行预计 < 200K tokens"
+    failure_modes:
+      - 默认路径被"顺手重构"引入非确定排序，破坏逐字节一致判据
+      - 为插件机制引入依赖或动态加载的安全面扩大
+      - 把语义排序耦合进核心（应只是接口约定 + 文档化）
+
+  - task_id: LF011
+    title: "ClaimLedger 迁移命令：claim store migrate（preview-first、可回滚）"
+    status: verified
+    category: small-feature-multi-path
+    source:
+      repo: "https://github.com/Anhao1314/ClaimLedger"
+      base_commit: "64310835bfd977b50ccdfb2795d563a2da73532b"
+      issue_url: "https://github.com/Anhao1314/ClaimLedger/issues/10"
+      design_doc: "https://github.com/Anhao1314/ClaimLedger/blob/main/docs/refactor-design.md"
+      verified_at: "2026-10-28"
+    real_user_problem: |
+      存储格式演进要求把旧库迁移到新结构，但用户数据安全第一：迁移必须
+      默认 dry-run 报告变更、显式 apply 才落盘、迁移前自动备份、失败可整
+      目录回滚、路径约定（CHAT_DISTILLER_HOME、~/.chat-distiller）不变。
+      目标：实现 claim store migrate 命令族，满足上述安全契约，并对合成
+      旧库完成零身份丢失的往返迁移。
+      （作者开放 issue #10 与设计文档 §4-P1 第 5 条；本任务为 P1 的迁移
+      脚本子项，不要求完成整个存储倒置。）
+    starting_state: |
+      ClaimLedger 在固定 commit 上：chat_distiller/_internal/migrate_memory.py
+      已存在部分迁移逻辑；benchmarks/fixtures 含合成库数据可作迁移输入；
+      数据安全契约见仓库 docs/data-safety.md。
+    tools_and_resources: "同 LF008；benchmarks/fixtures 的合成数据可本地使用。"
+    permission_boundaries: |
+      同 LF008；另：迁移操作只允许作用于测试沙箱内的合成库，禁止触碰
+      真实用户级 ~/.chat-distiller 数据。
+    independent_acceptance:
+      method: |
+        1) 安全判据：默认 dry-run 不写任何目标文件（文件快照前后一致）；
+           备份目录在 apply 前生成；注入故障时整目录可回滚；
+        2) 正确性判据：对合成旧库做 apply 后，往返迁移零身份丢失
+           （memory_id / supersession 链完整性断言，fixture 已在 benchmarks）；
+        3) 契约判据：迁移后旧文件保留只读（不删）；完整套件通过。
+      hidden_reference: |
+        Gold 参考（仅验收方）：设计文档 §4-P1 第 5 条与 docs/data-safety.md
+        的既有承诺。
+      needs_baseline_reproduction_before_run: true
+    b_prescribed_path: |
+      （方案取自作者设计文档 §4-P1 第 5 条。）
+      步骤：
+      1. 设计命令面：claim store migrate [--apply]（默认 dry-run 报告）；
+      2. 实现 preview 报告（将变更哪些文件、多少卡片、身份映射摘要）；
+      3. 实现 apply：先备份到 .chat-distiller/backup-v3/，再原子写入，
+         失败整目录回滚；
+      4. 迁移后旧文件保留只读；
+      5. 用 benchmarks/fixtures 合成库做往返迁移测试（零身份丢失断言）、
+         dry-run 只读断言、故障注入回滚测试；
+      6. 运行完整套件。
+      验证步骤：三项验收判据。
+    estimated_cost: "中；单次运行预计 < 300K tokens"
+    failure_modes:
+      - dry-run 路径产生副作用（临时文件泄漏到目标目录）
+      - 回滚实现只恢复部分文件（目录级一致性缺失）
+      - 身份映射在边界情况（重复 id、断链 supersession）丢失条目
+
+  # ---------------------------------------------------------------
+  # 候选任务（前提真实、来源可核查，但存在明示缺口）
+  # ---------------------------------------------------------------
+
+  - task_id: LF012
+    title: "RL-Sentinel：规则回测为何漏掉大多数失败 run——根因分析（候选）"
+    status: candidate
+    category: debug-root-cause
+    source:
+      repo: "https://github.com/Anhao1314/RL-Sentinel"
+      base_commit: "53158656231296882e738125c1a06e7a0e0b0494"
+      base_commit_note: "核查当日 main HEAD；前提引用 README 自述，可公开核查"
+      premise_url: "https://github.com/Anhao1314/RL-Sentinel#evidence"
+      verified_at: "2026-10-28"
+    real_user_problem: |
+      RL-Sentinel 的 README 自述（可核查）：当前 Go2W 数据集上观测到 18 个
+      运行（6 通过 / 12 失败），系统 readiness 为 candidate_for_external_
+      validation，且"规则回测仍然漏掉大多数失败（the rule backtest still
+      misses most failures）"。任务：用仓库自带数据集与回测工具，分析当前
+      规则漏掉失败 run 的类别与原因，产出可复现的召回差距报告；若发现
+      可修的规则缺口，给出带回测证据的规则调整建议（只建议，不默认落库）。
+    starting_state: |
+      RL-Sentinel 在固定 commit 上：含规则回测模块（backtest_engine.py、
+      backtest_rules.py、consistency_check.py）与提交的研究数据集
+      （data/datasets/*.csv）；README 与 PHASE_RECORD.md 记录了既有审计
+      发现与规则定义。
+    tools_and_resources: |
+      本地克隆；Python 3.12+ 与仓库依赖已预装；数据集随仓库分发；
+      无网络；无 GPU（本任务不涉及训练，只做离线回放分析）。
+    permission_boundaries: "同 LF001；另：不修改 data/ 下数据集，分析产物写到独立输出目录。"
+    independent_acceptance:
+      method: |
+        （待所有者确认——这是本任务被标记为 candidate 的原因。）
+        拟议判据：1) 召回差距数字可由验收方用独立脚本从原始数据集重算，
+        与交付报告一致；2) 每个被归类的漏报 run 都能从原始数据复现其
+        "规则为何未触发"的证据链；3) 若有规则建议，须给出改动前后的
+        召回/误报对比（同一数据、同一脚本）。
+      hidden_reference: |
+        无上游标准答案；PHASE_RECORD.md 中的既有审计发现可作交叉参考
+        （执行前判断是否向 Agent 提供该文件，须在附录 B 冻结）。
+      needs_baseline_reproduction_before_run: true
+    b_prescribed_path: |
+      步骤：
+      1. 复算当前规则集在固定数据集上的召回/误报基线（与 README 数字对齐）；
+      2. 对每个漏报 run 提取触发条件缺失的特征（时间窗、指标口径、阈值
+         距离），聚类成失败类别；
+      3. 检查规则实现与 PHASE_RECORD 中规则定义的口径一致性（已知历史
+         风险：因子口径不一致）；
+      4. 产出召回差距报告 + 每类的证据链 + （若有）规则调整建议及其
+         回测对比；
+      5. 所有数字可由独立脚本从 data/ 重算。
+      验证步骤：第 5 步是验收前提；报告数字与独立重算一致。
+    estimated_cost: "中-大；分析型任务，单次运行预计 < 350K tokens"
+    failure_modes:
+      - 报告数字无法独立重算（引用了未沉淀的中间状态）
+      - 把"规则未触发"错误归因于数据问题（或反之），证据链断裂
+      - 分析过拟合到 18 个 run 的小样本，建议不可泛化（如实标注即可）
+    preparation_gaps: |
+      1) 验收方式含主观成分，需所有者确认拟议判据或提供更客观判据，
+         确认前不运行本任务；
+      2) PHASE_RECORD.md 是否对 Agent 可见需在附录 B 冻结（可见会降低
+         根因不确定性，不可见则更接近真实用户情境）；
+      3) 若所有者认为判据无法客观化，应从本批次移出并在 amendments 记录
+         （须发生在查看任何运行结果之前）。

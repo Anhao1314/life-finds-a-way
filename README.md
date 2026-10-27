@@ -69,6 +69,8 @@
 
 > **`NOT_PROVEN` — 方法有效性仍待直接对照实验检验。**
 
+**第一个直接对照实验：预注册草案** → [`experiments/0001-open-path-selection`](./experiments/0001-open-path-selection/preregistration.md)——已设计，**未运行**；执行前需所有者确认模型与预算。设计实验不构成有效性证据，方法状态仍为 `NOT_PROVEN`。
+
 下面三项经历促成了这套思想。它们是**思想的来源与相关实践证据**，**不是** LFAW 方法有效性的直接证明——它们都发生在这份宪章确立之前。
 
 | 8/10 vs 7/10 | 保留失败 | 工程 PASS ≠ 价值成立 |
