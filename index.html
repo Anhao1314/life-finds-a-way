@@ -142,9 +142,11 @@ nav { display: flex; align-items: center; gap: clamp(20px, 3.4vw, 56px); }
 .hint .lit .glyph { background: var(--ink); }
 .hint .lit .label { color: var(--ink); }
 
+/* 亮带位于 116px 遮罩的 38%~62%（即 44~72px 处），提示框高 52px。
+   行程必须覆盖「带底贴框顶」到「带顶贴框底」= -72px → 52px，否则光带大半时间在框外空转。 */
 @keyframes band {
-  from { -webkit-mask-position: center -150px; mask-position: center -150px; }
-  to   { -webkit-mask-position: center 210px; mask-position: center 210px; }
+  from { -webkit-mask-position: center -84px; mask-position: center -84px; }
+  to   { -webkit-mask-position: center 58px; mask-position: center 58px; }
 }
 
 /* -------------------------------------------------------------------- 原子 */

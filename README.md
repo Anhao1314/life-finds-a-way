@@ -14,6 +14,15 @@
 
 </div>
 
+<div align="center">
+
+<img alt="站点动效演示：滑动推进场景、光带扫过提示、闭环轨道上的光点绕行、证据板数字滚动" src="./assets/media/journey.gif" width="720">
+
+<sub>八秒看完：滑动即推镜头 / 光带扫过提示文字 / 闭环轨道上的光点绕行 / 证据板数字滚动<br>
+动图由逐帧截取 <code>index.html</code> 后合成，合成脚本见 <a href="./tools/make_gif.py">tools/make_gif.py</a>；完整的可交互版本仍是 <a href="./index.html">index.html</a></sub>
+
+</div>
+
 > **这是一份持续修订的工作假设**，不是新的编程智能体框架，也不是已被证明能够普遍提高开发效率的方法。保留失败、保留 `INCONCLUSIVE`、保留"还不知道"。
 
 <div align="center">
@@ -190,6 +199,7 @@
 - [**`docs/design-language.md`**](./docs/design-language.md) —— 设计语言：两种颜色、一种像素字体、缓动与动效参数。
 - [**`tools/make_art.py`**](./tools/make_art.py) —— 全部背景与示意图的生成器（Bayer 8×8 有序抖动量化到 1-bit，可复现）。
 - [**`tools/build_font.py`**](./tools/build_font.py) —— 只把页面用到的字形从 [Fusion Pixel 12px Mono](https://github.com/TakWolf/fusion-pixel-font)（OFL-1.1）子集出来，15 KB 而不是 4.6 MB；许可证见 [`assets/fonts/LICENSE-OFL.txt`](./assets/fonts/LICENSE-OFL.txt)。
+- [**`tools/make_gif.py`**](./tools/make_gif.py) —— 把逐帧截取的 PNG 序列量化到固定 1-bit 调色板并合成 GIF（上面那张动图）。
 
 原则很简单：**能由脚本生成的，就不放进仓库；不能复现的装饰，就不加。**
 
