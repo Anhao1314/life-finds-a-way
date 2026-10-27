@@ -45,11 +45,17 @@
 
 | 产物 | 尺寸 | 用途 |
 | --- | --- | --- |
-| `assets/hero-dark.png` / `hero-light.png` | 1200×400 | README 主视觉（含烧进图里的 `LIFE FINDS A WAY`） |
+| `assets/hero-banner-dark.png` / `-light` | 1200×560 | README 主视觉：中文标题与英文锁排都烧进图里 |
+| `assets/evidence-dark.png` / `-light` | 1200×416 | README 证据板：三列数字与状态 |
+| `assets/divider-dark.png` / `-light` | 1200×64 | README 章节分隔带 |
 | `assets/loop-dark.png` / `loop-light.png` | 1280×600 | README 的闭环示意图 |
 | `assets/site/hero.png` | 1280×720 | 站点首屏背景（不含文字） |
+| `assets/site/fork.png` | 1280×720 | 提问的方式：一条路分岔，左暗右亮 |
+| `assets/site/boundary.png` | 1280×720 | 自主的边界：顶部许可区、一条边界虚线、越线尝试到线即止 |
+| `assets/site/loop-glow.png` | 1280×720 | 闭环：贴着轨道的环状辉光 |
+| `assets/site/step-{vary,select,retain}.png` | 120×120 | 三站的像素图标：分叉 / 漏斗落点 / 盆里的芽 |
 | `assets/site/nebula.png` | 1280×720 | 结尾场景的抖动星云 |
-| `assets/site/evidence-wall.png` | 1280×720 | 证据墙：状态记号组成的纹理 |
+| `assets/site/evidence-wall.png` | 1280×720 | 证据墙：状态记号组成的纹理（站点内压到 0.22 不透明度） |
 | `assets/site/ring.png` | 600×300 | 闭环的虚线轨道 |
 
 三个母题：
@@ -60,6 +66,15 @@
 
 绘制顺序有讲究：**先光带与雾，再给每条路"凿"出暗槽（`carve()` 乘法压暗），最后落线。**
 不振槽的话，虚线路会被亮区吞掉——这是从实际渲染里看出来的，不是想出来的。
+
+还有一条更硬的规则：**美术必须避让文字带。**
+`content_band()` 把场景中段（纵向 20%~82%，边界用 smoothstep 过渡）的场值按比例压暗，
+所以密度冲突是在生成阶段解决的，而不是事后拿 CSS 蒙版去盖。
+
+配套的取值纪律：`#7a7a7a` 只适用于近黑底。一旦某个场景铺了美术，
+次级文字要提亮一档（本站用 `#a0a0a0`）——否则网点会把灰字吃掉。
+证据墙这类"文字纹理"尤其危险：它本身是字，密度必须压到 0.22 不透明度以下，
+并加中心暗角，否则它会和正文抢注意力。
 
 ## 四、动效：一个缓动函数，两种扫光
 

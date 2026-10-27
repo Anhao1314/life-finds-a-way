@@ -1,9 +1,9 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./assets/hero-dark.png">
-  <source media="(prefers-color-scheme: light)" srcset="./assets/hero-light.png">
-  <img alt="Life Finds a Way：一条被证据点亮的路径，通向一颗刚发芽的小植物" src="./assets/hero-light.png" width="1200">
+  <source media="(prefers-color-scheme: dark)" srcset="./assets/hero-banner-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="./assets/hero-banner-light.png">
+  <img alt="生命会寻求自己的出路：一条被证据点亮的路径穿过暗淡的岔路，尽头是一颗刚发芽的小植物" src="./assets/hero-banner-light.png" width="1200">
 </picture>
 
 **我负责提出值得解决的问题，AI 负责探索可能的道路，真实世界负责给出反馈。**
@@ -16,7 +16,15 @@
 
 > **这是一份持续修订的工作假设**，不是新的编程智能体框架，也不是已被证明能够普遍提高开发效率的方法。保留失败、保留 `INCONCLUSIVE`、保留"还不知道"。
 
----
+<div align="center">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./assets/divider-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="./assets/divider-light.png">
+  <img alt="" src="./assets/divider-light.png" width="1200">
+</picture>
+
+</div>
 
 <a id="ask"></a>
 ## 01 · 提问的方式
@@ -114,6 +122,16 @@
 <a id="evidence"></a>
 ## 04 · 证据板
 
+<div align="center">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./assets/evidence-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="./assets/evidence-light.png">
+  <img alt="证据板：8/10 对 7/10；保留 FAIL 与 BLOCKED；工程 PASS 不等于价值成立" src="./assets/evidence-light.png" width="1200">
+</picture>
+
+</div>
+
 | 8/10 vs 7/10 | 保留失败 | 工程 PASS ≠ 价值成立 |
 | :--- | :--- | :--- |
 | [Deep Native](https://github.com/Anhao1314/deep-native/blob/main/docs/v0.1-pilot-findings.md)：10 组完整配对中，原始 DeepSeek 完成 **8/10**，启用技能后 **7/10**；工具调用中位数由 **29** 增至 **36**。<br>小样本不能否定所有技能，却足以反对「流程越多效果越好」的直觉。 | [G1 具身研究](https://github.com/Anhao1314/g1-jev-swarm-lab/blob/main/docs/lab-notebook/negative-results.md)：严格失败、授权拒绝与未证明的可靠性必须被记录。<br>`PASS` `FAIL` `BLOCKED` `INCONCLUSIVE` `NOT_PROVEN` | [FlowCredit](https://github.com/Anhao1314/flowcredit-research)：报告生成、工程跑通和模型调用次数，都不能替代真实用户价值。<br>瓶颈可能在模型，也可能在数据、工具、授权或交互。 |
@@ -139,7 +157,15 @@
 
 **这只是当前使用边界，不是已经被对照实验确认的模型能力分界线。** 使用高级模型也不保证结果更好。
 
----
+<div align="center">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./assets/divider-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="./assets/divider-light.png">
+  <img alt="" src="./assets/divider-light.png" width="1200">
+</picture>
+
+</div>
 
 <div align="center">
 

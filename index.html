@@ -8,7 +8,7 @@
 <meta name="description" content="我负责提出值得解决的问题，AI 负责探索可能的道路，真实世界负责给出反馈。一份从 AI 辅助编程的失败经历中形成的研发理念。">
 <meta property="og:title" content="Life Finds a Way · 生命会寻求自己的出路">
 <meta property="og:description" content="让证据决定什么值得保留。">
-<meta property="og:image" content="assets/hero-dark.png">
+<meta property="og:image" content="assets/hero-banner-dark.png">
 <link rel="icon" href="assets/site/icon-swipe.svg">
 <style>
 /* ===========================================================================
@@ -85,10 +85,10 @@ a { color: inherit; text-decoration: none; }
 .scene-bg { position: absolute; inset: 0; z-index: 0; }
 /* 压暗蒙版：抖动网点在中低亮度才读得出字，顶部与底部让出深底 */
 .scrim::after { content: ""; position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,.76) 0%, rgba(0,0,0,.30) 22%, rgba(0,0,0,0) 42%, rgba(0,0,0,.62) 60%, rgba(0,0,0,.95) 100%); }
-.wall img { opacity: .5; }
+  background: linear-gradient(180deg, rgba(0,0,0,.86) 0%, rgba(0,0,0,.42) 20%, rgba(0,0,0,.06) 40%, rgba(0,0,0,.62) 62%, rgba(0,0,0,.95) 100%); }
+.wall img { opacity: .22; }
 .wall::after { content: ""; position: absolute; inset: 0;
-  background: radial-gradient(68% 58% at 50% 50%, rgba(0,0,0,.97) 0%, rgba(0,0,0,.88) 46%, rgba(0,0,0,.60) 100%); }
+  background: radial-gradient(62% 52% at 50% 52%, rgba(0,0,0,.99) 0%, rgba(0,0,0,.94) 48%, rgba(0,0,0,.72) 100%); }
 #closing .scene-bg::after { content: ""; position: absolute; inset: 0; background: radial-gradient(78% 66% at 50% 52%, rgba(0,0,0,.92) 0%, rgba(0,0,0,.68) 52%, rgba(0,0,0,.34) 100%); }
 .scene-bg img { width: 100%; height: 100%; object-fit: cover; }
 .scene-layer { position: relative; z-index: 2; height: 100%; }
@@ -198,13 +198,13 @@ nav { display: flex; align-items: center; gap: clamp(20px, 3.4vw, 56px); }
 .col h3 { margin: 0 0 18px; font-size: 20px; line-height: 28px; font-weight: 400; }
 .col ul { margin: 0; padding: 0; list-style: none; }
 .col li { font-size: var(--body); line-height: 1.75; }
-.col.old h3, .col.old li { color: var(--dim); }
+.col.old h3, .col.old li { color: #9d9d9d; }
 .col.new h3, .col.new li { color: var(--ink); }
 .col.new li::before { content: "▸ "; }
 .col.old li::before { content: "· "; }
 .axis { display: flex; align-items: center; justify-content: center; }
 .axis svg { width: 100%; max-width: 88px; height: 18px; }
-.caption { margin: clamp(26px, 5vh, 46px) auto 0; font-size: 15px; line-height: 24px; color: var(--dim); text-align: center; max-width: 60ch; }
+.caption { margin: clamp(26px, 5vh, 46px) auto 0; font-size: 15px; line-height: 24px; color: #a0a0a0; text-align: center; max-width: 60ch; }
 
 /* ---------------------------------------------------------------- 进化闭环 */
 
@@ -215,20 +215,23 @@ nav { display: flex; align-items: center; gap: clamp(20px, 3.4vw, 56px); }
   offset-path: path("M 48 150 A 252 126 0 1 0 552 150 A 252 126 0 1 0 48 150");
   offset-rotate: 0deg; offset-anchor: center center; offset-distance: var(--d); }
 .station .box { width: 240px; transform: translate(var(--tx, -50%), var(--ty, -50%)); text-align: center; }
-.station .idx { font-size: 14px; line-height: 20px; color: var(--dim); }
+.station .idx { font-size: 14px; line-height: 20px; color: #a8a8a8; }
+.station .icon { display: block; margin-bottom: 10px; }
+.station .icon img { width: 54px; height: 54px; margin: 0 auto; }
 .station h3 { margin: 6px 0 8px; font-size: 24px; line-height: 32px; font-weight: 400; }
-.station p { margin: 0; font-size: 15px; line-height: 24px; color: var(--dim); }
+.station p { margin: 0; font-size: 15px; line-height: 24px; color: #a8a8a8; }
 .travel { position: absolute; left: 0; top: 0; width: 8px; height: 8px; background: var(--ink);
   offset-path: path("M 48 150 A 252 126 0 1 0 552 150 A 252 126 0 1 0 48 150"); offset-rotate: 0deg; offset-anchor: center center;
   animation: travel 9s linear infinite; }
 @keyframes travel { from { offset-distance: 0%; } to { offset-distance: 100%; } }
 .loop-center { position: absolute; left: 50%; top: 50%; width: 330px; transform: translate(-50%, -50%); text-align: center; }
 .loop-center .en { font-size: 15px; line-height: 24px; letter-spacing: .5px; white-space: nowrap; }
-.loop-center p { margin: 12px 0 0; font-size: 14px; line-height: 22px; color: var(--dim); }
+.loop-center p { margin: 12px 0 0; font-size: 14px; line-height: 22px; color: #a8a8a8; }
 
 /* ------------------------------------------------------------------ 证据板 */
 
 .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(20px, 4vw, 56px); width: 100%; max-width: 1080px; margin: clamp(20px, 6vh, 60px) auto 0; }
+.board .cell + .cell { border-left: 1px solid var(--line); padding-left: clamp(20px, 4vw, 56px); }
 .cell .num { font-size: clamp(34px, 4.8vw, 64px); line-height: 1; letter-spacing: .02em; white-space: nowrap; }
 .cell .num small { font-size: .34em; color: var(--dim); margin-left: .35em; letter-spacing: 0; }
 .cell hr { margin: 22px 0 16px; }
@@ -373,6 +376,7 @@ footer.colophon { padding: clamp(90px, 16vh, 160px) var(--edge) clamp(40px, 8vh,
 
   <!-- 02 提问的方式 -->
   <section class="scene" data-scene="1" aria-label="提问的方式：不再这样写，改为这样写">
+    <div class="scene-bg scrim" aria-hidden="true"><img class="pixelated" src="assets/site/fork.png" alt=""></div>
     <div class="scene-layer copy panel">
       <h2 class="scene-title reveal" style="--i:0"><span class="arrow left" aria-hidden="true"></span>提问的方式<span class="arrow right" aria-hidden="true"></span></h2>
       <div class="compare">
@@ -416,15 +420,16 @@ footer.colophon { padding: clamp(90px, 16vh, 160px) var(--edge) clamp(40px, 8vh,
 
   <!-- 03 进化闭环 -->
   <section class="scene" data-scene="2" aria-label="进化闭环：变异、选择、保留">
+    <div class="scene-bg" aria-hidden="true" style="opacity:.85"><img class="pixelated" src="assets/site/loop-glow.png" alt=""></div>
     <div class="scene-layer copy panel" style="justify-content:flex-start">
       <h2 class="scene-title reveal" style="--i:0"><span class="arrow left" aria-hidden="true"></span>进化闭环<span class="arrow right" aria-hidden="true"></span></h2>
       <div class="orbit-fit" id="orbit-fit">
         <div class="orbit">
           <img class="ring-img pixelated" src="assets/site/ring.png" alt="" aria-hidden="true">
           <div class="travel" aria-hidden="true"></div>
-          <div class="station" style="--d:0%;--tx:-100%;--ty:-50%"><div class="box"><span class="idx">01</span><h3>变异</h3><p>提出多条真正不同的解决路径</p></div></div>
-          <div class="station" style="--d:33.3333%;--tx:-50%;--ty:0%"><div class="box"><span class="idx">02</span><h3>选择</h3><p>用真实任务、对照实验与成本筛选</p></div></div>
-          <div class="station" style="--d:66.6667%;--tx:-50%;--ty:-100%"><div class="box"><span class="idx">03</span><h3>保留</h3><p>把被证明有效的纳入基线</p></div></div>
+          <div class="station" style="--d:0%;--tx:-100%;--ty:-50%"><div class="box"><span class="icon"><img class="pixelated" src="assets/site/step-vary.png" alt="" aria-hidden="true"></span><span class="idx">01</span><h3>变异</h3><p>提出多条真正不同的解决路径</p></div></div>
+          <div class="station" style="--d:33.3333%;--tx:-50%;--ty:0%"><div class="box"><span class="icon"><img class="pixelated" src="assets/site/step-select.png" alt="" aria-hidden="true"></span><span class="idx">02</span><h3>选择</h3><p>用真实任务、对照实验与成本筛选</p></div></div>
+          <div class="station" style="--d:66.6667%;--tx:-50%;--ty:-100%"><div class="box"><span class="icon"><img class="pixelated" src="assets/site/step-retain.png" alt="" aria-hidden="true"></span><span class="idx">03</span><h3>保留</h3><p>把被证明有效的纳入基线</p></div></div>
           <div class="loop-center">
             <p class="en">Variation → Selection → Retention</p>
             <p>没有可靠的选择机制，所谓"自进化"只是不断增加代码、复杂度或上下文。</p>
@@ -451,7 +456,7 @@ footer.colophon { padding: clamp(90px, 16vh, 160px) var(--edge) clamp(40px, 8vh,
           <p>Deep Native 的 10 组完整配对：原始 DeepSeek 完成 8/10，启用技能后 7/10；工具调用中位数由 <span data-count="29">0</span> &rarr; <span data-count="36">0</span>。</p>
         </div>
         <div class="cell reveal" style="--i:2">
-          <p class="num">保留</p>
+          <p class="num">FAIL</p>
           <hr class="rule">
           <h3>失败也是证据</h3>
           <p>严格失败、授权拒绝与未证明的可靠性必须被记录，不能为了让报告好看而改写历史评分。</p>
@@ -476,6 +481,7 @@ footer.colophon { padding: clamp(90px, 16vh, 160px) var(--edge) clamp(40px, 8vh,
 
   <!-- 05 自主的边界 -->
   <section class="scene" data-scene="4" aria-label="自主的边界">
+    <div class="scene-bg scrim" aria-hidden="true"><img class="pixelated" src="assets/site/boundary.png" alt=""></div>
     <div class="scene-layer copy panel">
       <h2 class="scene-title reveal" style="--i:0"><span class="arrow left" aria-hidden="true"></span>自主的边界<span class="arrow right" aria-hidden="true"></span></h2>
       <div class="bounds">

@@ -7,14 +7,21 @@
     用法：python tools/make_art.py
 
 产物：
-    assets/hero-dark.png           README 主视觉（黑底白点，含字）
-    assets/hero-light.png          README 主视觉（白底黑点，含字）
-    assets/site/hero.png           站点首屏背景（无字，文案由 DOM 承担）
-    assets/site/nebula.png         结尾场景的抖动星云（随滚动位移）
-    assets/site/evidence-wall.png  证据墙：状态记号被低频噪声调制出明暗
-    assets/site/ring.png           演化闭环的虚线环
+    assets/hero-banner-{dark,light}.png   README 主视觉：中文标题烧进图里
+    assets/loop-{dark,light}.png          README 的闭环示意图
+    assets/evidence-{dark,light}.png      README 证据板：三列数字与状态
+    assets/divider-{dark,light}.png       README 章节分隔带
+    assets/site/hero.png                  站点首屏背景（无字，文案由 DOM 承担）
+    assets/site/fork.png                  提问的方式：一条路分岔，左暗右亮
+    assets/site/boundary.png              自主的边界：许可区、边界线、越线尝试
+    assets/site/loop-glow.png             闭环：贴着轨道的环状辉光
+    assets/site/step-*.png                三站图标：分叉 / 漏斗落点 / 盆里的芽
+    assets/site/nebula.png                结尾场景的抖动星云（随滚动位移）
+    assets/site/evidence-wall.png         证据墙：状态记号被低频噪声调制出明暗
+    assets/site/ring.png                  演化闭环的虚线环
 
 母题（见 docs/design-language.md）：
+    避让  文字带（纵向 20%~82%）由 content_band() 主动压暗，美术不与正文抢密度
     分支  多条道路同时存在，绝大多数保持暗淡
     证据  一道斜向光带扫过画面，只有被照到的那条路变成实心
     保留  被照亮的路径尽头，长出一个小小的芽
@@ -237,7 +244,7 @@ def sprout(f, cx, cy, v=1.0):
     disc(f, int(cx - 6), int(cy - 9), 1.4, v)
 
 
-def hero_scene(W, H, seed=7, with_text=False, invert=False, lockup="LIFE FINDS A WAY"):
+def hero_scene(W, H, seed=7, invert=False):
     """首屏：起点在左下，多数道路暗淡，一道光带照出被选中的那条。"""
     rad = value_noise(W, H, 5, seed + 1)
     cloud = value_noise(W, H, 3, seed + 7)
@@ -276,14 +283,7 @@ def hero_scene(W, H, seed=7, with_text=False, invert=False, lockup="LIFE FINDS A
     sprout(f, sx, sy)
     disc(f, int(origin[0]), int(origin[1]), 2.6, 1.0)
 
-    tx, ty = int(0.055 * W), int(0.10 * H)
-    if with_text:
-        darken_ellipse(f, tx + 0.34 * W, ty + DESIGN_PX * 0.5, 0.42 * W, 0.20 * H, 0.9)
-
-    img = quantize(f, invert=invert)
-    if with_text:
-        stamp_text(img, lockup, DESIGN_PX, (tx, ty), tracking=1, ink=0 if invert else 1)
-    return upscale(img)
+    return upscale(quantize(f, invert=invert))
 
 
 def nebula(W, H, seed=21, invert=False):
@@ -377,17 +377,251 @@ def loop_diagram(W=320, H=150, invert=False):
     return upscale(img)
 
 
+
+def content_band(f, W, H, keep=0.42, top=0.20, bottom=0.82, soft=0.10):
+    """正文永远落在中段。把这一带的场值按比例压暗，美术自动避让文字。
+    边界用 smoothstep 过渡，避免出现横向硬边。"""
+    for y in range(H):
+        t = y / max(1, H - 1)
+        if t < top - soft or t > bottom + soft:
+            k = 1.0
+        elif top <= t <= bottom:
+            k = keep
+        else:
+            edge = (top - t) / soft if t < top else (t - bottom) / soft
+            e = min(1.0, max(0.0, edge))
+            k = keep + (1.0 - keep) * (e * e * (3 - 2 * e))
+        for x in range(W):
+            f[y][x] *= k
+
+
+
+def fork_scene(W=320, H=180, seed=41, invert=False):
+    """提问的方式：一条路在画面中央分岔。左边那条暗淡（预先选好的路径），右边那条被点亮。"""
+    f = field(W, H)
+    rad = value_noise(W, H, 6, seed)
+    for y in range(H):
+        for x in range(W):
+            f[y][x] += 0.03 + (rad[y][x] - 0.5) * 0.07
+            k = max(0.0, (y / H - 0.78) / 0.22)
+            f[y][x] += k * k * 0.16
+    content_band(f, W, H, keep=0.34)
+    ox, oy = 0.50 * W, 0.94 * H
+    left = [(ox, oy), (0.34 * W, 0.66 * H), (0.16 * W, 0.42 * H), (0.08 * W, 0.22 * H)]
+    right = [(ox, oy), (0.68 * W, 0.62 * H), (0.84 * W, 0.36 * H), (0.90 * W, 0.18 * H)]
+    carve(f, left, radius=2, factor=0.48)
+    polyline(f, left, 0.40, jitter=1.5, seed=seed + 1)
+    carve(f, right, radius=2, factor=0.58)
+    polyline(f, right, 1.0, jitter=1.0, seed=seed + 2)
+    beam(f, (0.46 * W, -0.10 * H), (1.18 * W, 0.70 * H), 0.085 * W, 0.11)
+    tx, ty = int(0.90 * W), int(0.16 * H)
+    for y in range(ty - 9, ty + 10):
+        for x in range(tx - 11, tx + 11):
+            if 0 <= x < W and 0 <= y < H:
+                d = math.hypot((x - tx) / 11, (y - ty) / 9)
+                f[y][x] *= 1.0 - 0.82 * max(0.0, 1.0 - d)
+    sprout(f, tx, ty)
+    disc(f, int(ox), int(oy), 2.2, 1.0)
+    return upscale(quantize(f, invert=invert))
+
+
+def boundary_scene(W=320, H=180, seed=51, invert=False):
+    """自主的边界：顶部是许可区（密网点），一条横向虚线，线以下几乎全黑。
+    密集区只占顶部一条——正文要坐在中段的暗底上。"""
+    f = field(W, H)
+    rad = value_noise(W, H, 7, seed)
+    fine = value_noise(W, H, 19, seed + 1)
+    ny = int(0.22 * H)
+    for y in range(H):
+        for x in range(W):
+            if y < ny:
+                f[y][x] += 0.05 + rad[y][x] * 0.20 * (1 - y / ny)
+            else:
+                f[y][x] += 0.022 + (fine[y][x] - 0.5) * 0.05
+    beam(f, (-0.05 * W, 0.02 * H), (1.05 * W, 0.20 * H), 0.05 * H, 0.11)
+    for x in range(0, W, 7):                      # 边界线
+        for k in range(4):
+            put(f, x + k, ny, 1.0, absolute=True)
+            put(f, x + k, ny + 1, 1.0, absolute=True)
+    rnd = random.Random(seed)
+    for i in range(12):                           # 越线尝试：到线即止
+        x = rnd.randrange(int(0.05 * W), int(0.95 * W))
+        y0 = rnd.randrange(int(0.07 * H), ny - 8)
+        polyline(f, [(x, y0), (x, ny - 4)], 0.5, thickness=1, seed=seed + i)
+        disc(f, x, ny - 5, 1.1, 1.0)
+    return upscale(quantize(f, invert=invert))
+
+
+def loop_glow(W=320, H=180, seed=61, invert=False):
+    """闭环背景：一圈柔和的抖动辉光，让轨道不悬在纯黑上。"""
+    f = field(W, H)
+    n = value_noise(W, H, 4, seed)
+    m = value_noise(W, H, 13, seed + 1)
+    for y in range(H):
+        for x in range(W):
+            d = math.hypot((x - 0.5 * W) / (0.40 * W), (y - 0.5 * H) / (0.42 * H))
+            ring = max(0.0, 1.0 - abs(d - 1.0) * 3.6)
+            f[y][x] += ring * ring * (0.07 + 0.13 * n[y][x]) * (0.5 + 0.7 * m[y][x])
+            f[y][x] += 0.012 + (m[y][x] - 0.5) * 0.03
+    content_band(f, W, H, keep=0.46, top=0.26, bottom=0.86)
+    return upscale(quantize(f, invert=invert))
+
+
+def step_icon(kind, invert=False, S=30, k=4):
+    """闭环三站的像素小图标：分叉（变异）/ 漏斗落点（选择）/ 盆里的芽（保留）。"""
+    f = field(S, S)
+    mid = S // 2
+    if kind == "vary":
+        for i, dy in enumerate((-9, 0, 9)):
+            polyline(f, [(5, mid), (S - 9, mid + dy)], 0.5, thickness=1, seed=i)
+            disc(f, S - 7, mid + dy, 2.0, 1.0)
+        disc(f, 4, mid, 2.2, 1.0)
+    elif kind == "select":
+        polyline(f, [(3, 5), (S - 4, 5)], 0.45, thickness=1, seed=1)
+        polyline(f, [(3, 5), (mid - 2, mid + 3)], 0.8, thickness=1, seed=2)
+        polyline(f, [(S - 4, 5), (mid + 2, mid + 3)], 0.8, thickness=1, seed=3)
+        polyline(f, [(mid, mid + 4), (mid, S - 8)], 0.7, thickness=1, seed=4)
+        disc(f, mid, S - 5, 2.4, 1.0)
+    else:
+        polyline(f, [(7, S - 9), (S - 7, S - 9)], 0.55, thickness=1, seed=5)
+        polyline(f, [(10, S - 6), (S - 10, S - 6)], 0.40, thickness=1, seed=6)
+        polyline(f, [(mid, S - 10), (mid, mid - 1)], 1.0, thickness=1, seed=7)
+        polyline(f, [(mid, mid - 1), (mid + 5, mid - 6)], 1.0, thickness=1, seed=8)
+        polyline(f, [(mid, mid + 2), (mid - 5, mid - 5)], 1.0, thickness=1, seed=9)
+        disc(f, mid + 6, mid - 7, 1.7, 1.0)
+        disc(f, mid - 6, mid - 6, 1.7, 1.0)
+    return upscale(quantize(f, invert=invert), k)
+
+
+def hero_banner(W=300, H=140, invert=False, seed=13):
+    """README 主视觉：中文标题烧进图里，右侧是被证据选中的那条路。"""
+    f = field(W, H)
+    rad = value_noise(W, H, 5, seed)
+    fine = value_noise(W, H, 17, seed + 1)
+    ox, oy = 0.09 * W, 0.88 * H
+    for y in range(H):
+        for x in range(W):
+            g = max(0.0, 1.0 - math.hypot((x - ox) / (0.38 * W), (y - oy) / (0.52 * H)))
+            f[y][x] += g * g * 0.28 * (0.5 + 0.9 * rad[y][x])
+            k = max(0.0, (y / H - 0.78) / 0.22)
+            f[y][x] += k * k * 0.34 * (0.5 + 0.9 * rad[y][x])
+            c = max(0.0, 1.0 - math.hypot((x - 0.84 * W) / (0.28 * W), (y - 0.20 * H) / (0.30 * H)))
+            f[y][x] += c * (0.5 * rad[y][x] + 0.12) * 0.24
+            f[y][x] += 0.03 + (fine[y][x] - 0.5) * 0.09
+    beam(f, (-0.02 * W, 0.84 * H), (1.02 * W, 0.24 * H), 0.055 * H, 0.19)
+    beam(f, (-0.02 * W, 0.82 * H), (1.02 * W, 0.26 * H), 0.016 * H, 0.13)
+
+    rnd = random.Random(seed)
+    dim = []
+    for i in range(7):
+        t = i / 6
+        ex = (0.62 - 0.10 * t) * W + rnd.uniform(-0.02, 0.02) * W
+        ey = (0.72 - 0.44 * t) * H + rnd.uniform(-0.02, 0.02) * H
+        mx = ox + (ex - ox) * 0.55
+        my = oy + (ey - oy) * 0.46
+        dim.append([(ox, oy), (mx, my), (ex, ey)])
+    lit = [(ox, oy), (0.40 * W, 0.62 * H), (0.66 * W, 0.30 * H)]
+    for pts in dim:
+        carve(f, pts, radius=1, factor=0.40)
+        polyline(f, pts, 0.44, jitter=1.4, seed=rnd.randrange(99999))
+    carve(f, lit, radius=2, factor=0.60)
+    polyline(f, lit, 1.0, jitter=0.9, seed=seed + 900)
+    tx, ty = int(0.70 * W), int(0.20 * H)
+    for y in range(ty - 10, ty + 12):
+        for x in range(tx - 12, tx + 12):
+            if 0 <= x < W and 0 <= y < H:
+                d = math.hypot((x - tx) / 12, (y - ty) / 11)
+                f[y][x] *= 1.0 - 0.84 * max(0.0, 1.0 - d)
+    sprout(f, tx, ty)
+    disc(f, int(ox), int(oy), 2.4, 1.0)
+    for _ in range(int(W * H * 0.0010)):
+        put(f, rnd.randrange(W), rnd.randrange(int(H * 0.42)), 1.0, absolute=True)
+
+    lx, ly = int(0.06 * W), int(0.09 * H)
+    darken_ellipse(f, lx + 0.42 * W, ly + 18, 0.46 * W, 0.21 * H, 0.92)
+    img = quantize(f, invert=invert)
+    ink = 0 if invert else 1
+    stamp_text(img, "LIFE FINDS A WAY", 12, (lx, ly), tracking=1, ink=ink)
+    stamp_text(img, "生命会寻求自己的出路", 24, (lx, ly + 20), ink=ink)
+    stamp_text(img, "让证据决定什么值得保留。", 12, (lx, ly + 52), ink=ink, shadow=None)
+    return upscale(img)
+
+
+def evidence_board(W=300, H=104, invert=False, seed=71):
+    """README 版证据板：三列数字与状态，全部烧进像素字。列宽按 1200px 显示宽度反推。"""
+    f = field(W, H)
+    n = value_noise(W, H, 5, seed)
+    for y in range(H):
+        for x in range(W):
+            f[y][x] += 0.05 + n[y][x] * 0.07
+    beam(f, (0.0, -0.2 * H), (1.0 * H, 1.3 * H), 0.045 * W, 0.07)
+    cols = [8, 106, 204]
+    for cx in (106, 204):
+        for y in range(10, H - 10, 4):
+            put(f, cx - 10, y, 1.0, absolute=True)
+    img = quantize(f, invert=invert)
+    ink = 0 if invert else 1
+    probe = ImageDraw.Draw(Image.new("L", (1, 1)))
+
+    def w_of(text, size):
+        font = ImageFont.truetype(font_path(), size)
+        return int(sum(probe.textlength(c, font=font) for c in text))
+
+    for cx, big, sub, label in (
+        (cols[0], "8/10", "vs 7/10", "\u5c0f\u6837\u672c\u63a8\u7ffb\u76f4\u89c9"),
+        (cols[1], "FAIL", "BLOCKED", "\u5931\u8d25\u4e5f\u662f\u8bc1\u636e"),
+        (cols[2], "PASS", "\u53ea\u662f\u8dd1\u901a", "\u5de5\u7a0b\u4e0d\u7b49\u4e8e\u4ef7\u503c"),
+    ):
+        # 大字 + 紧随其下的一行小字，避免横向挤压
+        stamp_text(img, big, 24, (cx, 20), ink=ink, shadow=None)
+        stamp_text(img, sub, 12, (cx, 50), ink=ink, shadow=None)
+        stamp_text(img, label, 12, (cx, 72), ink=ink, shadow=None)
+    img = upscale(img)
+    d = ImageDraw.Draw(img)
+    for cx in cols:
+        d.line([(cx * 4, 44 * 4), ((cx + 88) * 4, 44 * 4)], fill=ink, width=4)
+    return img
+
+
+def divider(W=300, invert=False):
+    """章节分隔：一条虚线，中间一颗小芽。"""
+    H = 16
+    f = field(W, H)
+    for x in range(0, W, 7):
+        if 138 <= x <= 160:
+            continue
+        for k in range(4):
+            put(f, x + k, 8, 0.6, absolute=True)
+    for yy in range(3, 12):
+        put(f, 150, yy, 1.0, absolute=True)
+    for xx in range(145, 156):
+        put(f, xx, 6, 1.0, absolute=True)
+        put(f, xx, 10, 1.0, absolute=True)
+    return upscale(quantize(f, invert=invert))
+
+
+
 def main():
     out = os.path.join(ROOT, "assets")
     site = os.path.join(out, "site")
     os.makedirs(site, exist_ok=True)
 
     jobs = [
-        (os.path.join(out, "hero-dark.png"), lambda: hero_scene(300, 100, with_text=True, invert=False)),
-        (os.path.join(out, "hero-light.png"), lambda: hero_scene(300, 100, with_text=True, invert=True)),
-        (os.path.join(site, "hero.png"), lambda: hero_scene(320, 180, seed=11, with_text=False)),
+        (os.path.join(site, "hero.png"), lambda: hero_scene(320, 180, seed=11)),
         (os.path.join(site, "nebula.png"), lambda: nebula(320, 180)),
         (os.path.join(site, "ring.png"), lambda: ring(150, 75)),
+        (os.path.join(site, "fork.png"), lambda: fork_scene()),
+        (os.path.join(site, "boundary.png"), lambda: boundary_scene()),
+        (os.path.join(site, "loop-glow.png"), lambda: loop_glow()),
+        (os.path.join(site, "step-vary.png"), lambda: step_icon("vary")),
+        (os.path.join(site, "step-select.png"), lambda: step_icon("select")),
+        (os.path.join(site, "step-retain.png"), lambda: step_icon("retain")),
+        (os.path.join(out, "hero-banner-dark.png"), lambda: hero_banner(invert=False)),
+        (os.path.join(out, "hero-banner-light.png"), lambda: hero_banner(invert=True)),
+        (os.path.join(out, "evidence-dark.png"), lambda: evidence_board(invert=False)),
+        (os.path.join(out, "evidence-light.png"), lambda: evidence_board(invert=True)),
+        (os.path.join(out, "divider-dark.png"), lambda: divider(invert=False)),
+        (os.path.join(out, "divider-light.png"), lambda: divider(invert=True)),
         (os.path.join(site, "evidence-wall.png"), lambda: evidence_wall(320, 180)),
         (os.path.join(out, "loop-dark.png"), lambda: loop_diagram(invert=False)),
         (os.path.join(out, "loop-light.png"), lambda: loop_diagram(invert=True)),
