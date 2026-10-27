@@ -1,0 +1,2 @@
+# 构建中间产物：源字体与临时文件不入库（见 tools/build_font.py）
+.build/

@@ -2,6 +2,30 @@
 
 该仓库保存《生命会寻求自己的出路》研发理念的演进轨迹。
 
+## 展示层重构 · 1-bit 像素（2026-10-27）
+
+**这不是一次理念修订**，而是把仓库的展示层重做了一遍。动机、依据与全部变化如下。
+
+**动机：** 这份理念的核心是"开放路径、严守边界、忠于证据"，但仓库此前只有默认的 GitHub 排版与两张极简 SVG 头图，读起来像一份普通说明文档。展示层与内容之间缺少一致性——一份讲"让证据选择道路"的文档，首页却没有把这条道路画出来。
+
+**事实依据（内容未改动）：**
+
+- `CHARTER.md`、`docs/origin-story.md`、`history/2026-10-13_v1.0.md` 全文未作任何修改。
+- README 保留全部原有事实、链接与限制条件，可逐条比对：Deep Native 的 10 组配对 8/10 与 7/10、工具调用中位数 29 → 36、G1 的严格失败、FlowCredit 的价值问题、v0.2 技能尚未合并的说明。
+- 新增内容中只有一处判断性表述（"能由脚本生成的，就不放进仓库"），属于本版实现约定，不是对方法有效性的主张。
+
+**变化：**
+
+- 新增 [`index.html`](./index.html)：可离线打开的叙事页（场景化滚动、像素字体、抖动网点美术、7 个场景），含 `prefers-reduced-motion` 与无 JS 退化。
+- 新增 [`docs/design-language.md`](./docs/design-language.md)：颜色、字体、美术、动效、交互与内容纪律的完整说明。
+- 新增 [`tools/make_art.py`](./tools/make_art.py)：全部背景与示意图的生成器（Bayer 8×8 抖动 → 1-bit，可复现）。
+- 新增 [`tools/build_font.py`](./tools/build_font.py) 与 `assets/fonts/lfaw-pixel-mono-subset.woff2`：按页面实际字符子集化 Fusion Pixel 12px Mono（OFL-1.1），约 15 KB；许可证存于 `assets/fonts/LICENSE-OFL.txt`。
+- 替换 `assets/hero-dark.svg`、`assets/hero-light.svg` 为同名 PNG 主视觉（1-bit 像素，明暗两版）。
+- 新增 `assets/loop-dark.png`、`assets/loop-light.png`：变异 → 选择 → 保留 的闭环示意图。
+- README 重排为 5 个区块（提问的方式 / 我的转变 / 进化闭环 / 证据板 / 自主的边界）；原有"我的转变"五阶段与通用任务模板改为可折叠区块，避免首页过长。
+
+**如何复核：** `python -m http.server` 后访问 `http://127.0.0.1:8000/`；美术可用 `python tools/make_art.py` 重新生成，与仓库内的 PNG 逐字节比对。
+
 ## v1.0 · 2026-10-13
 
 **首次确立研发宪章。**
